@@ -1,6 +1,6 @@
 #!/bin/zsh
 # Builds a firmware, embeds its bootloader + partition table into a migrator project, builds the migrator.
-# Usage: build_migrator.sh <firmware-project-dir> <migrator-project-dir> <out-dir> [extra idf.py args for the firmware]
+# Usage: build_migrator.sh <firmware-project-dir> <migrator-project-dir> <out-dir> [extra idf.py args for both builds]
 # Output: <out-dir>/<firmware>.bin, <out-dir>/<migrator>.bin (+ .sha256). Fails if the migrator exceeds 1 MB.
 set -eo pipefail
 FW=${1:A}; MIG=${2:A}; OUT=${3:A}; shift 3
@@ -24,7 +24,7 @@ with open(os.path.join(d, "blobs_manifest.h"), "w") as f:
     f.write(entry("partition-table.bin", "BLOB_PARTITION_TABLE"))
 PY
 
-(cd "$MIG" && "${IDF[@]}" build >/dev/null)
+(cd "$MIG" && "${IDF[@]}" "$@" build >/dev/null)
 app_bin() { python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); print(d["build_dir"] + "/" + d["app_bin"])' "$1/build/project_description.json"; }
 fw_bin=$(app_bin "$FW")
 mig_bin=$(app_bin "$MIG")
