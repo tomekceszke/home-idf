@@ -10,5 +10,6 @@ typedef struct {
 } hi_log_config_t;
 
 /* Routes esp_log output to serial and UDP; the uptime "(12345)" becomes "(HH:MM:SS)" once the clock is set.
- * UDP sends are skipped from the lwIP thread (deadlock guard). Safe before WiFi is up (sends fail silently). */
+ * Logging never waits for the network: lines go into a ring buffer sent by a low-priority task and are dropped
+ * when it is full (also avoids the lwIP-thread deadlock). Safe before WiFi is up. */
 void hi_log_init(const hi_log_config_t *config);

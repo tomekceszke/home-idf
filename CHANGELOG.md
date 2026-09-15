@@ -1,12 +1,17 @@
 # Changelog
 
+## 0.1.1 (2026-09-15)
+
+- `hi_log`: UDP lines go through a ring buffer and a sender task, so `ESP_LOG` in time-critical tasks never waits
+  for the lwIP thread; lines are dropped when the buffer is full.
+
 ## 0.1.0 (2026-09-15)
 
 First release, extracted from gate-controller 2.0.2 and water-controller.
 
 - `hi_wifi`: strongest-AP join (all-channel scan, sort by signal, 802.11k/v), reconnect backoff on an
   `esp_timer` instead of sleeping in the system event loop, non-blocking start.
-- `hi_log`: serial + UDP log, wall-clock timestamps, lwIP-thread deadlock guard, optional error-line hook.
+- `hi_log`: serial + UDP log, wall-clock timestamps, optional error-line hook.
 - `hi_ntp`: non-blocking SNTP with sync callback and boot time.
 - `hi_ota`: HTTPS OTA (blocking or background task), optional DELETE of the published image.
 - `hi_notify`: ntfy.sh queue (never blocks senders), priority/tags/click, error de-duplication.

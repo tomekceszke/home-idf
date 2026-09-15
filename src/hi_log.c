@@ -3,6 +3,7 @@
 #include <string.h>
 #include <time.h>
 #include "freertos/FreeRTOS.h"
+#include "freertos/ringbuf.h"
 #include "freertos/task.h"
 #include "esp_log.h"
 #include "lwip/sockets.h"
@@ -10,11 +11,13 @@
 #include "hi_log.h"
 
 #define RAW_SIZE 256
-#define OUT_SIZE 300        // datetime replacing the uptime digits may be longer
+#define OUT_SIZE 300            // datetime replacing the uptime digits may be longer
+#define RINGBUF_SIZE 4096
 #define EPOCH_2020 1577836800L
 
 static int s_sock = -1;
 static struct sockaddr_in s_addr;
+static RingbufHandle_t s_ringbuf;
 static void (*s_on_error_line)(const char *line);
 
 /* "(12345)" -> "(HH:MM:SS)" once the wall clock is set; unchanged otherwise. */
@@ -44,14 +47,25 @@ static int log_vprintf(const char *fmt, va_list args)
     replace_timestamp(raw, out, sizeof(out));
     fputs(out, stdout);
 
-    // Socket calls from the lwIP TCP/IP thread itself would wait on that same thread (deadlock)
-    if (s_sock >= 0 && strcmp(pcTaskGetName(NULL), "tiT") != 0) {
-        sendto(s_sock, out, strlen(out), 0, (struct sockaddr *) &s_addr, sizeof(s_addr));
+    // Never touch the network from the logging task: UDP sends go through a ring buffer (dropped when full)
+    if (s_ringbuf != NULL && !xPortInIsrContext()) {
+        xRingbufferSend(s_ringbuf, out, strlen(out), 0);
     }
     if (s_on_error_line != NULL && out[0] == 'E' && out[1] == ' ') {
         s_on_error_line(out);
     }
     return len;
+}
+
+static void udp_task(void *arg)
+{
+    for (;;) {
+        size_t size = 0;
+        char *item = xRingbufferReceive(s_ringbuf, &size, portMAX_DELAY);
+        if (item == NULL) continue;
+        sendto(s_sock, item, size, 0, (struct sockaddr *) &s_addr, sizeof(s_addr));
+        vRingbufferReturnItem(s_ringbuf, item);
+    }
 }
 
 void hi_log_init(const hi_log_config_t *config)
@@ -63,6 +77,12 @@ void hi_log_init(const hi_log_config_t *config)
         s_addr.sin_port = htons(config->udp_port);
         if (inet_pton(AF_INET, config->udp_ip, &s_addr.sin_addr) == 1) {
             s_sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+        }
+        if (s_sock >= 0) {
+            RingbufHandle_t rb = xRingbufferCreate(RINGBUF_SIZE, RINGBUF_TYPE_NOSPLIT);
+            if (rb != NULL && xTaskCreate(udp_task, "hi_log", 3072, NULL, 2, NULL) == pdPASS) {
+                s_ringbuf = rb;
+            }
         }
     }
     esp_log_level_set("esp-x509-crt-bundle", ESP_LOG_WARN);
