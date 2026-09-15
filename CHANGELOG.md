@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.3 (2026-09-15)
+
+- `hi_migrator` (optional, `CONFIG_HOME_IDF_MIGRATOR`): OTA migration of a legacy two_ota device to a new
+  bootloader and partition table, ported from gate-controller (production-proven); slot offset and safe-state
+  handling come from the application.
+- `tools/build_migrator.sh`: builds a firmware, embeds its bootloader and table into a migrator project.
+
 ## 0.1.2 (2026-09-15)
 
 - `hi_log`: the UDP socket is created by the sender task once WiFi is connected. `hi_log_init()` before

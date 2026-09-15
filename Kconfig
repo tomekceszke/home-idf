@@ -27,4 +27,11 @@ menu "home-idf"
             Optional: signs a JWT with a service account key, exchanges it for a Google ID token and
             posts JSON to a Cloud Function / Cloud Run endpoint. Call it from a background task only.
 
+    config HOME_IDF_MIGRATOR
+        bool "OTA migrator (rewrites bootloader and partition table of a legacy device)"
+        default n
+        depends on SPI_FLASH_DANGEROUS_WRITE_ALLOWED
+        help
+            Only for a dedicated one-shot migrator image. Requires CONFIG_SPI_FLASH_DANGEROUS_WRITE_ALLOWED.
+
 endmenu

@@ -16,6 +16,7 @@ projects. It was hardened on devices running 24/7.
 | `hi_auth` | Web login: PBKDF2-SHA256 password, sessions persisted in NVS (hash only), CSRF tokens (HMAC), login back-off, admin header for scripts |
 | `hi_httpd` | HTTP server with guards: Host allowlist (DNS rebinding), Origin + CSRF + JSON for mutations, CSP, common session/UI/admin routes |
 | `hi_gcp` | *Optional* (`CONFIG_HOME_IDF_GCP`): service account JWT → Google ID token → HTTPS POST to Cloud Functions / Cloud Run |
+| `hi_migrator` | *Optional* (`CONFIG_HOME_IDF_MIGRATOR`): one-shot OTA image that moves a legacy two_ota device onto a new bootloader and partition table, then installs the firmware |
 
 ## Design rules
 
@@ -102,6 +103,7 @@ Mutation = session cookie + `Content-Type: application/json` + `X-CSRF-Token` + 
 | `tools/hash_password.py` | Prompts for a password, prints the `AUTH_PASSWORD_*` defines |
 | `tools/gzip_asset.py` | Deterministic gzip (used by `home_idf_embed_gzip`) |
 | `tools/make_icon.py` | 180×180 PNG icon for iOS "Add to Home Screen" |
+| `tools/build_migrator.sh` | Builds a firmware and a migrator project with the firmware's bootloader and partition table embedded |
 
 ## Build the example
 

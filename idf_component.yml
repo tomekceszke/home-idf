@@ -1,4 +1,4 @@
-version: "0.1.2"
+version: "0.1.3"
 description: Shared ESP-IDF framework for home controllers (WiFi, logging, NTP, OTA, health/rollback, ntfy, web auth and API guards)
 url: https://github.com/tomekceszke/home-idf
 license: MIT

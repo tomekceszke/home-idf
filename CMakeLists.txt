@@ -13,9 +13,13 @@ if(CONFIG_HOME_IDF_GCP)
     list(APPEND srcs "src/hi_gcp.c")
 endif()
 
+if(CONFIG_HOME_IDF_MIGRATOR)
+    list(APPEND srcs "src/hi_migrator.c")
+endif()
+
 idf_component_register(
     SRCS ${srcs}
     INCLUDE_DIRS "include"
     REQUIRES esp_http_server esp_timer json
     PRIV_REQUIRES esp_wifi esp_netif esp_event esp_ringbuf nvs_flash esp_http_client esp_https_ota esp_app_format
-                  app_update mbedtls lwip)
+                  app_update mbedtls lwip spi_flash esp_partition bootloader_support)
