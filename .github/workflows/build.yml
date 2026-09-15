@@ -5,6 +5,17 @@ on:
   pull_request:
 
 jobs:
+  host-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: hi_secret round trip against tools/obfuscate.py
+        run: |
+          cc -Wall -Wextra -Werror -I include src/hi_secret.c test/test_secret.c -o test_secret
+          value='Zażółć gęślą jaźń 123!'
+          obf=$(python3 -c "import sys; sys.path.insert(0, 'tools'); import obfuscate; print(obfuscate.obfuscate(sys.argv[1]))" "$value")
+          ./test_secret "$obf" "$value"
+
   example:
     runs-on: ubuntu-latest
     strategy:

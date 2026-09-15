@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.5 (2026-09-15)
+
+- `hi_secret` + `tools/obfuscate.py`: obfuscated (not encrypted) credentials, `"obf1:<hex>"`, so Wi-Fi passwords
+  and tokens are not readable at a glance in `credentials.h` or with `strings`; plain values keep working.
+
 ## 0.1.4 (2026-09-15)
 
 - `hi_ota`: deleting the published image counts as done on any 2xx status (the local OTA server answers without a

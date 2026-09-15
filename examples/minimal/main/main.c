@@ -17,6 +17,7 @@
 #include "hi_notify.h"
 #include "hi_ntp.h"
 #include "hi_ota.h"
+#include "hi_secret.h"
 #include "hi_system.h"
 #include "hi_wifi.h"
 #if CONFIG_HOME_IDF_GCP
@@ -53,7 +54,9 @@ void app_main(void)
     ESP_LOGI(TAG, "Reset reason: %s", hi_reset_reason());
 
     hi_log_init(&(hi_log_config_t) {.udp_ip = "192.168.1.10", .udp_port = 1337, .on_error_line = hi_notify_error});
-    hi_wifi_start(&(hi_wifi_config_t) {.ssid = WIFI_SSID, .password = WIFI_PASS, .hostname = "home-idf-demo"});
+    static char wifi_pass[65];
+    hi_secret_reveal(WIFI_PASS, wifi_pass, sizeof(wifi_pass));     // "obf1:..." or plain
+    hi_wifi_start(&(hi_wifi_config_t) {.ssid = WIFI_SSID, .password = wifi_pass, .hostname = "home-idf-demo"});
     hi_notify_init(&(hi_notify_config_t) {
         .topic = NTFY_TOPIC, .error_topic = NTFY_ERROR_TOPIC, .error_title = "Demo error", .error_cooldown_s = 3600,
     });

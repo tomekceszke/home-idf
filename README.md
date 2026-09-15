@@ -7,6 +7,7 @@ projects. It was hardened on devices running 24/7.
 | Module | What it does |
 |---|---|
 | `hi_system` | NVS init (reports erasure), reset reason, delayed restart |
+| `hi_secret` | Reveals credentials obfuscated with `tools/obfuscate.py` (hides them from a glance, **not** encryption) |
 | `hi_wifi` | Station that joins the **strongest** AP of an SSID (all-channel scan, 802.11k/v); reconnect with backoff on an `esp_timer`; never blocks boot or the event loop |
 | `hi_log` | `esp_log` to serial + UDP, `(HH:MM:SS)` timestamps once the clock is set, error-line hook |
 | `hi_ntp` | Non-blocking SNTP, time zone, boot time |
@@ -113,6 +114,7 @@ Mutation = session cookie + `Content-Type: application/json` + `X-CSRF-Token` + 
 | Script | Purpose |
 |---|---|
 | `tools/hash_password.py` | Prompts for a password, prints the `AUTH_PASSWORD_*` defines |
+| `tools/obfuscate.py` | Prompts for a credential, prints `"obf1:..."` for `credentials.h` |
 | `tools/gzip_asset.py` | Deterministic gzip (used by `home_idf_embed_gzip`) |
 | `tools/make_icon.py` | 180×180 PNG icon for iOS "Add to Home Screen" |
 | `tools/build_migrator.sh` | Builds a firmware and a migrator project with the firmware's bootloader and partition table embedded |

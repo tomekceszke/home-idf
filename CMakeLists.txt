@@ -1,5 +1,6 @@
 set(srcs
     "src/hi_system.c"
+    "src/hi_secret.c"
     "src/hi_wifi.c"
     "src/hi_log.c"
     "src/hi_ntp.c"
