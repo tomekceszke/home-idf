@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.2 (2026-09-15)
+
+- `hi_log`: the UDP socket is created by the sender task once WiFi is connected. `hi_log_init()` before
+  `hi_wifi_start()` crashed with `tcpip_send_msg_wait_sem (Invalid mbox)`. Found on hardware.
+
 ## 0.1.1 (2026-09-15)
 
 - `hi_log`: UDP lines go through a ring buffer and a sender task, so `ESP_LOG` in time-critical tasks never waits

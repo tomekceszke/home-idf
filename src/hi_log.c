@@ -9,6 +9,7 @@
 #include "lwip/sockets.h"
 
 #include "hi_log.h"
+#include "hi_wifi.h"
 
 #define RAW_SIZE 256
 #define OUT_SIZE 300            // datetime replacing the uptime digits may be longer
@@ -59,6 +60,18 @@ static int log_vprintf(const char *fmt, va_list args)
 
 static void udp_task(void *arg)
 {
+    // Sockets need the lwIP stack, which exists only once WiFi is started; lines logged before stay in the buffer
+    while (!hi_wifi_is_connected()) {
+        vTaskDelay(pdMS_TO_TICKS(500));
+    }
+    s_sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    if (s_sock < 0) {
+        RingbufHandle_t rb = s_ringbuf;
+        s_ringbuf = NULL;           // stop producers first
+        vTaskDelay(pdMS_TO_TICKS(100));
+        vRingbufferDelete(rb);
+        vTaskDelete(NULL);
+    }
     for (;;) {
         size_t size = 0;
         char *item = xRingbufferReceive(s_ringbuf, &size, portMAX_DELAY);
@@ -71,17 +84,15 @@ static void udp_task(void *arg)
 void hi_log_init(const hi_log_config_t *config)
 {
     s_on_error_line = config->on_error_line;
-    if (config->udp_ip != NULL && s_sock < 0) {
+    if (config->udp_ip != NULL && s_ringbuf == NULL) {
         memset(&s_addr, 0, sizeof(s_addr));
         s_addr.sin_family = AF_INET;
         s_addr.sin_port = htons(config->udp_port);
         if (inet_pton(AF_INET, config->udp_ip, &s_addr.sin_addr) == 1) {
-            s_sock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-        }
-        if (s_sock >= 0) {
-            RingbufHandle_t rb = xRingbufferCreate(RINGBUF_SIZE, RINGBUF_TYPE_NOSPLIT);
-            if (rb != NULL && xTaskCreate(udp_task, "hi_log", 3072, NULL, 2, NULL) == pdPASS) {
-                s_ringbuf = rb;
+            s_ringbuf = xRingbufferCreate(RINGBUF_SIZE, RINGBUF_TYPE_NOSPLIT);
+            if (s_ringbuf != NULL && xTaskCreate(udp_task, "hi_log", 3072, NULL, 2, NULL) != pdPASS) {
+                vRingbufferDelete(s_ringbuf);
+                s_ringbuf = NULL;
             }
         }
     }
