@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.4 (2026-09-15)
+
+- `hi_ota`: deleting the published image counts as done on any 2xx status (the local OTA server answers without a
+  body, which `esp_http_client_perform()` reports as an error). Found in the water-controller migration rehearsal.
+
 ## 0.1.3 (2026-09-15)
 
 - `hi_migrator` (optional, `CONFIG_HOME_IDF_MIGRATOR`): OTA migration of a legacy two_ota device to a new

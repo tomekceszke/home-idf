@@ -31,8 +31,12 @@ static esp_err_t delete_bin(void)
     esp_http_client_handle_t client = esp_http_client_init(&http);
     if (client == NULL) return ESP_FAIL;
     esp_err_t err = esp_http_client_perform(client);
+    int status = esp_http_client_get_status_code(client);
     esp_http_client_cleanup(client);
-    return err;
+    // Simple servers answer DELETE without a body or Content-Length: perform() may report an error after a 200
+    if (status >= 200 && status < 300) return ESP_OK;
+    ESP_LOGW(TAG, "DELETE returned HTTP %d (%s)", status, esp_err_to_name(err));
+    return err != ESP_OK ? err : ESP_FAIL;
 }
 
 esp_err_t hi_ota_run(void)
