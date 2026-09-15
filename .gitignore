@@ -1,0 +1,15 @@
+.DS_Store
+.idea/
+.vscode/
+.zed/
+.cache/
+.claude/
+build/
+build-*/
+managed_components/
+dependencies.lock
+sdkconfig
+sdkconfig.old
+credentials.h
+*.pem
+__pycache__/

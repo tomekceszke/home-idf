@@ -1,0 +1,23 @@
+name: build
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  example:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        variant: [default, gcp]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build examples/minimal (${{ matrix.variant }})
+        uses: espressif/esp-idf-ci-action@v1
+        with:
+          esp_idf_version: v5.4.2
+          target: esp32
+          path: examples/minimal
+          command: >-
+            idf.py -B build-${{ matrix.variant }} -D SDKCONFIG=build-${{ matrix.variant }}/sdkconfig
+            -D "SDKCONFIG_DEFAULTS=sdkconfig.defaults${{ matrix.variant == 'gcp' && ';sdkconfig.gcp' || '' }}" build

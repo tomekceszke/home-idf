@@ -1,0 +1,30 @@
+menu "home-idf"
+
+    config HOME_IDF_WIFI_RETRY_MAX_S
+        int "Maximum WiFi reconnect backoff (s)"
+        default 60
+        range 2 3600
+
+    config HOME_IDF_AUTH_MAX_SESSIONS
+        int "Stored web sessions"
+        default 4
+        range 1 16
+        help
+            Sessions are persisted in NVS as one blob; the oldest is evicted when full.
+
+    config HOME_IDF_NOTIFY_TASK_STACK
+        int "Notification task stack (bytes)"
+        default 6144
+
+    config HOME_IDF_OTA_TASK_STACK
+        int "Background OTA task stack (bytes)"
+        default 8192
+
+    config HOME_IDF_GCP
+        bool "Google Cloud client (service account JWT -> ID token -> HTTPS POST)"
+        default n
+        help
+            Optional: signs a JWT with a service account key, exchanges it for a Google ID token and
+            posts JSON to a Cloud Function / Cloud Run endpoint. Call it from a background task only.
+
+endmenu
