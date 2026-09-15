@@ -35,8 +35,20 @@ projects. It was hardened on devices running 24/7.
 dependencies:
   home-idf:
     git: https://github.com/tomekceszke/home-idf.git
-    version: v0.1.0
-    # override_path: ../../home-idf     # local development
+    version: v0.1.3
+```
+
+Local development against a checkout: the component manager ignores `override_path` for git dependencies, so put
+the checkout on `EXTRA_COMPONENT_DIRS` (a project component of the same name wins) and write a separate lock file:
+
+```cmake
+if(DEFINED ENV{HOME_IDF_LOCAL})
+    set(EXTRA_COMPONENT_DIRS $ENV{HOME_IDF_LOCAL})
+endif()
+include($ENV{IDF_PATH}/tools/cmake/project.cmake)
+if(DEFINED ENV{HOME_IDF_LOCAL})
+    idf_build_set_property(DEPENDENCIES_LOCK ${CMAKE_CURRENT_LIST_DIR}/dependencies.local.lock)
+endif()
 ```
 
 `main/CMakeLists.txt`:
