@@ -1,15 +1,17 @@
 #!/bin/zsh
 # Builds a firmware, embeds its bootloader + partition table into a migrator project, builds the migrator.
 # Usage: build_migrator.sh <firmware-project-dir> <migrator-project-dir> <out-dir> [extra idf.py args for both builds]
+# BUILD_DIR=<name> (default build) when the extra arguments contain -B <name>.
 # Output: <out-dir>/<firmware>.bin, <out-dir>/<migrator>.bin (+ .sha256). Fails if the migrator exceeds 1 MB.
 set -eo pipefail
 FW=${1:A}; MIG=${2:A}; OUT=${3:A}; shift 3
+B=${BUILD_DIR:-build}
 source ~/.espressif/tools/activate_idf_v5.4.2.sh >/dev/null 2>&1 || true
 IDF=("$IDF_PYTHON_ENV_PATH/bin/python" "$IDF_PATH/tools/idf.py")
 
 (cd "$FW" && "${IDF[@]}" "$@" build >/dev/null)
 mkdir -p "$MIG/blobs" "$OUT"
-cp "$FW/build/bootloader/bootloader.bin" "$FW/build/partition_table/partition-table.bin" "$MIG/blobs/"
+cp "$FW/$B/bootloader/bootloader.bin" "$FW/$B/partition_table/partition-table.bin" "$MIG/blobs/"
 
 python3 - "$MIG/blobs" <<'PY'
 import hashlib, os, sys
@@ -25,7 +27,7 @@ with open(os.path.join(d, "blobs_manifest.h"), "w") as f:
 PY
 
 (cd "$MIG" && "${IDF[@]}" "$@" build >/dev/null)
-app_bin() { python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); print(d["build_dir"] + "/" + d["app_bin"])' "$1/build/project_description.json"; }
+app_bin() { python3 -c 'import json,sys; d=json.load(open(sys.argv[1])); print(d["build_dir"] + "/" + d["app_bin"])' "$1/$B/project_description.json"; }
 fw_bin=$(app_bin "$FW")
 mig_bin=$(app_bin "$MIG")
 cp "$fw_bin" "$mig_bin" "$OUT/"
