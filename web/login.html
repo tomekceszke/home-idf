@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f1e27">
+<meta name="color-scheme" content="dark">
+<meta name="robots" content="noindex">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="@HI_LOGIN_NAME@">
+@HI_LOGIN_ICON_LINKS@
+<title>@HI_LOGIN_NAME@</title>
+<style>
+:root {
+  --accent: @HI_LOGIN_ACCENT@;
+  --bg: #0f1e27;
+  --field: #16272f;
+  --line: #27465a;
+  --text: #e4eff3;
+  --muted: #8aa9b6;
+  --bad: #ffb4a9;
+  --gap: 20px;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body {
+  background: var(--bg); color: var(--text);
+  font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+  min-height: 100vh; min-height: 100dvh;
+  display: flex; align-items: center;
+  padding: calc(env(safe-area-inset-top) + 24px) 28px calc(env(safe-area-inset-bottom) + 24px);
+}
+form { width: 100%; max-width: 340px; margin: 0 auto; }
+h1 { margin: 0 0 40px; font: 700 46px/.98 system-ui, sans-serif; letter-spacing: -.05em; }
+h1 .p, h1 .h { color: var(--accent); font-size: 1.45em; letter-spacing: -.06em; }
+h1 .p { text-transform: uppercase; }
+h1 .h { opacity: .45; vertical-align: .06em; }
+h1 .r { display: block; color: var(--text); }
+label { display: block; margin: 0 0 10px; font-size: 14px; color: var(--muted); }
+/* One rule for both controls: this is what keeps them the same height. */
+input, button { width: 100%; font: inherit; border-radius: 12px; padding: 16px; border: 1px solid transparent; }
+input { color: inherit; border-color: var(--line); background: var(--field); }
+button { margin-top: var(--gap); font-weight: 600; background: var(--accent); color: #0d1c24; cursor: pointer; }
+button:disabled { opacity: .55; cursor: default; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+#message { min-height: 1.4em; margin: 16px 0 0; font-size: 14px; color: var(--bad); }
+</style>
+</head>
+<body>
+<form id="form">
+  <h1><span class="p">@HI_LOGIN_PREFIX@</span><span class="h">@HI_LOGIN_HYPHEN@</span><span class="r">@HI_LOGIN_REST@</span></h1>
+  <label for="password">Password</label>
+  <input id="password" type="password" autocomplete="current-password" required autofocus>
+  <button id="submit">Sign in</button>
+  <p id="message" role="alert"></p>
+</form>
+<script>
+"use strict";
+const form = document.getElementById("form");
+const button = document.getElementById("submit");
+const message = document.getElementById("message");
+let wait = 0;
+
+function countdown(ms) {
+  clearInterval(wait);
+  const until = Date.now() + ms;
+  button.disabled = true;
+  const tick = () => {
+    const left = Math.ceil((until - Date.now()) / 1000);
+    if (left <= 0) { clearInterval(wait); button.disabled = false; message.textContent = ""; return; }
+    message.textContent = `Wrong password. Try again in ${left} s.`;
+  };
+  tick();
+  wait = setInterval(tick, 250);
+}
+
+form.addEventListener("submit", async e => {
+  e.preventDefault();
+  button.disabled = true;
+  message.textContent = "";
+  try {
+    const r = await fetch("/api/login", {
+      method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({password: document.getElementById("password").value}),
+    });
+    if (r.ok) { location.replace("/"); return; }
+    const data = await r.json().catch(() => ({}));
+    if (data.retry_after_ms) { countdown(data.retry_after_ms); return; }
+    message.textContent = data.error === "login_disabled" ? "Sign-in is turned off on this device." : "Sign-in failed.";
+  } catch (err) {
+    message.textContent = "Can’t reach the device.";
+  }
+  button.disabled = false;
+});
+</script>
+</body>
+</html>

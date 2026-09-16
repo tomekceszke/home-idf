@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.6 (2026-09-16)
+
+- Shared sign-in page: `web/login.html` + `home_idf_login_page(<lib> NAME <device> [ACCENT <#rrggbb>] [ICONS ON|OFF])`,
+  rendered at build time and embedded under the symbols `hi_httpd` already reads, so apps drop their own copy
+  without any C change. Left-aligned wordmark split on the name's first hyphen, no device information beyond the
+  name, system faces only (the page is served offline). Field and button share one rule, which is what keeps them
+  the same height.
+
 ## 0.1.5 (2026-09-15)
 
 - `hi_secret` + `tools/obfuscate.py`: obfuscated (not encrypted) credentials, `"obf1:<hex>"`, so Wi-Fi passwords

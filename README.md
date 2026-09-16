@@ -56,8 +56,15 @@ endif()
 
 ```cmake
 idf_component_register(SRCS "main.c" PRIV_REQUIRES nvs_flash)
-home_idf_embed_gzip(${COMPONENT_LIB} ${project_dir}/web/login.html ${project_dir}/web/app.html)
+home_idf_login_page(${COMPONENT_LIB} NAME "my-device" ACCENT "#56c2e6")
+home_idf_embed_gzip(${COMPONENT_LIB} ${project_dir}/web/app.html)
 ```
+
+`home_idf_login_page()` renders the shared sign-in page ([`web/login.html`](web/login.html)) with this device's
+name and accent colour and embeds it under the symbols `hi_httpd` expects, so every controller signs in through
+the same page. The wordmark splits the name on its first hyphen (`my-device` → accent `MY-` over `device`). Pass
+`ICONS OFF` when the app does not serve `/manifest.webmanifest` and `/apple-touch-icon.png`. An app that wants a
+page of its own keeps its `login.html` in `home_idf_embed_gzip()` instead.
 
 `main.c` (abridged, see [`examples/minimal`](examples/minimal/main/main.c)):
 

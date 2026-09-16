@@ -1,5 +1,6 @@
 # Included by the ESP-IDF build into every project that depends on home-idf.
 
+set(HOME_IDF_DIR ${CMAKE_CURRENT_LIST_DIR} CACHE INTERNAL "home-idf directory")
 set(HOME_IDF_TOOLS_DIR ${CMAKE_CURRENT_LIST_DIR}/tools CACHE INTERNAL "home-idf tools directory")
 
 # home_idf_embed_gzip(<component lib> <file>...)
@@ -19,4 +20,48 @@ function(home_idf_embed_gzip lib)
         add_dependencies(${lib} home_idf_gz_${target_suffix})
         target_add_binary_data(${lib} ${gz} BINARY)
     endforeach()
+endfunction()
+
+# home_idf_login_page(<component lib> NAME <device name> [ACCENT <#rrggbb>] [ICONS ON|OFF])
+# Renders the shared sign-in page (web/login.html) with this device's name and accent colour and embeds it
+# the same way home_idf_embed_gzip() would, as _binary_login_html_gz_start / _binary_login_html_gz_end.
+# The wordmark splits the name on its first hyphen: "w-controller" -> accent "W-" over "controller".
+# ICONS OFF drops the manifest and touch-icon links for apps that do not serve them.
+function(home_idf_login_page lib)
+    cmake_parse_arguments(ARG "" "NAME;ACCENT;ICONS" "" ${ARGN})
+    if(NOT ARG_NAME)
+        message(FATAL_ERROR "home_idf_login_page: NAME is required")
+    endif()
+    if(NOT ARG_ACCENT)
+        set(ARG_ACCENT "#56c2e6")
+    endif()
+    if(NOT DEFINED ARG_ICONS)
+        set(ARG_ICONS ON)
+    endif()
+
+    set(HI_LOGIN_NAME "${ARG_NAME}")
+    set(HI_LOGIN_ACCENT "${ARG_ACCENT}")
+    string(FIND "${ARG_NAME}" "-" hyphen)
+    if(hyphen EQUAL -1)
+        string(SUBSTRING "${ARG_NAME}" 0 1 HI_LOGIN_PREFIX)
+        string(SUBSTRING "${ARG_NAME}" 1 -1 HI_LOGIN_REST)
+        set(HI_LOGIN_HYPHEN "")
+    else()
+        string(SUBSTRING "${ARG_NAME}" 0 ${hyphen} HI_LOGIN_PREFIX)
+        math(EXPR after_hyphen "${hyphen} + 1")
+        string(SUBSTRING "${ARG_NAME}" ${after_hyphen} -1 HI_LOGIN_REST)
+        set(HI_LOGIN_HYPHEN "-")
+    endif()
+    if(ARG_ICONS)
+        string(CONCAT HI_LOGIN_ICON_LINKS
+                "<link rel=\"icon\" href=\"/apple-touch-icon.png\">\n"
+                "<link rel=\"apple-touch-icon\" href=\"/apple-touch-icon.png\">\n"
+                "<link rel=\"manifest\" href=\"/manifest.webmanifest\">")
+    else()
+        set(HI_LOGIN_ICON_LINKS "")
+    endif()
+
+    set(rendered ${CMAKE_CURRENT_BINARY_DIR}/login_page/login.html)
+    configure_file(${HOME_IDF_DIR}/web/login.html ${rendered} @ONLY)
+    home_idf_embed_gzip(${lib} ${rendered})
 endfunction()
