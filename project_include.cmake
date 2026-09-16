@@ -65,3 +65,23 @@ function(home_idf_login_page lib)
     configure_file(${HOME_IDF_DIR}/web/login.html ${rendered} @ONLY)
     home_idf_embed_gzip(${lib} ${rendered})
 endfunction()
+
+# home_idf_app_page(<component lib> SRC <app.html> NAME <device name>)
+# Renders the app page with the shared shell (web/app_shell.css, web/app_shell.js, wordmark, tab bar; see
+# tools/render_page.py for the placeholders) and embeds it like home_idf_embed_gzip() would, as
+# _binary_app_html_gz_start / _binary_app_html_gz_end when SRC is named app.html.
+function(home_idf_app_page lib)
+    cmake_parse_arguments(ARG "" "SRC;NAME" "" ${ARGN})
+    if(NOT ARG_SRC OR NOT ARG_NAME)
+        message(FATAL_ERROR "home_idf_app_page: SRC and NAME are required")
+    endif()
+    idf_build_get_property(python PYTHON)
+    get_filename_component(name ${ARG_SRC} NAME)
+    set(rendered ${CMAKE_CURRENT_BINARY_DIR}/app_page/${name})
+    add_custom_command(OUTPUT ${rendered}
+            COMMAND ${python} ${HOME_IDF_TOOLS_DIR}/render_page.py ${ARG_SRC} ${rendered} --name ${ARG_NAME}
+            DEPENDS ${ARG_SRC} ${HOME_IDF_TOOLS_DIR}/render_page.py
+                    ${HOME_IDF_DIR}/web/app_shell.css ${HOME_IDF_DIR}/web/app_shell.js
+            VERBATIM)
+    home_idf_embed_gzip(${lib} ${rendered})
+endfunction()

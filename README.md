@@ -57,7 +57,7 @@ endif()
 ```cmake
 idf_component_register(SRCS "main.c" PRIV_REQUIRES nvs_flash)
 home_idf_login_page(${COMPONENT_LIB} NAME "my-device" ACCENT "#56c2e6")
-home_idf_embed_gzip(${COMPONENT_LIB} ${project_dir}/web/app.html)
+home_idf_app_page(${COMPONENT_LIB} SRC ${project_dir}/web/app.html NAME "my-device")
 ```
 
 `home_idf_login_page()` renders the shared sign-in page ([`web/login.html`](web/login.html)) with this device's
@@ -65,6 +65,22 @@ name and accent colour and embeds it under the symbols `hi_httpd` expects, so ev
 the same page. The wordmark splits the name on its first hyphen (`my-device` → accent `MY-` over `device`). Pass
 `ICONS OFF` when the app does not serve `/manifest.webmanifest` and `/apple-touch-icon.png`. An app that wants a
 page of its own keeps its `login.html` in `home_idf_embed_gzip()` instead.
+
+`home_idf_app_page()` renders the app page with the shared shell ([`web/app_shell.css`](web/app_shell.css),
+[`web/app_shell.js`](web/app_shell.js)), so every controller has the same layout: wordmark and status, headline, three
+numbers, main view, latest events, and a swipe control with small actions docked above the tabs Live / History /
+Settings. The page sets its palette on `:root` and keeps its own markup and logic; placeholders pull in the shell:
+
+```html
+<title>@HI_APP_NAME@</title>
+<style>@HI_APP_CSS@ :root { --bg: #1d2227; --accent: #f2b01e; /* ... */ }</style>
+<section id="live" class="tab"><header class="top">@HI_APP_WORDMARK@</header> ... </section>
+<div class="dock" id="dock"><div id="mainSwipe"></div><div class="chips"> ... </div></div>
+@HI_APP_TABS@
+<script>@HI_APP_JS@ const tabs = hi.tabs(); hi.swipe($("mainSwipe"), {text: "Slide to ...", onFire});</script>
+```
+
+Local development servers render the same page with `tools/render_page.py` (`render_page.render(html, name)`).
 
 `main.c` (abridged, see [`examples/minimal`](examples/minimal/main/main.c)):
 
@@ -122,6 +138,7 @@ Mutation = session cookie + `Content-Type: application/json` + `X-CSRF-Token` + 
 |---|---|
 | `tools/hash_password.py` | Prompts for a password, prints the `AUTH_PASSWORD_*` defines |
 | `tools/obfuscate.py` | Prompts for a credential, prints `"obf1:..."` for `credentials.h` |
+| `tools/render_page.py` | App page with the shared shell (used by `home_idf_app_page` and development servers) |
 | `tools/gzip_asset.py` | Deterministic gzip, minifies HTML comments and `<style>` blocks first (used by `home_idf_embed_gzip`) |
 | `tools/make_icon.py` | 180×180 PNG icon for iOS "Add to Home Screen" |
 | `tools/build_migrator.sh` | Builds a firmware and a migrator project with the firmware's bootloader and partition table embedded |
@@ -137,6 +154,7 @@ CI builds the example with and without the GCP module.
 ## Used by
 
 - [water-controller](https://github.com/tomekceszke/water-controller): anti-flood valve with flow metering
+- [gate-controller](https://github.com/tomekceszke/gate-controller): garage gate with a live camera (web app shell so far)
 
 ## License
 

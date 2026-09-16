@@ -1,0 +1,133 @@
+/* Shared app shell for every controller (inserted into the app page by tools/render_page.py).
+   Layout of the Live tab, top to bottom: wordmark + status, headline, three numbers, main view, latest events;
+   swipe and small actions docked above the tabs Live / History / Settings.
+   A page sets its palette on :root: --bg --panel --line --text --muted --accent --on-accent --warn --bad --ok. */
+:root {
+  --bg: #0f1e27; --panel: #162a35; --line: #27465a; --text: #e4eff3; --muted: #8aa9b6;
+  --accent: #56c2e6; --on-accent: #0d1c24; --warn: #f2a541; --bad: #ff6f5e; --ok: #5fc98a;
+  --round: ui-rounded, "SF Pro Rounded", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --gap: 20px; --r: 16px; --r-sm: 12px; --tabs: 58px;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--text); }
+body {
+  font: 16px/1.45 var(--font); -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent;
+  font-variant-numeric: tabular-nums;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) calc(var(--tabs) + 24px + env(safe-area-inset-bottom)) env(safe-area-inset-left);
+}
+body.tab-live { padding-bottom: calc(var(--tabs) + 204px + env(safe-area-inset-bottom)); }
+main { max-width: 560px; margin: 0 auto; padding: 12px var(--gap) 0; }
+p { margin: 0; }
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+a { color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+[hidden] { display: none !important; }
+
+/* Header */
+.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 40px; }
+.mark { font: 700 21px/1 var(--font); letter-spacing: -.04em; white-space: nowrap; }
+.mark .p { color: var(--accent); font-size: 1.35em; text-transform: uppercase; letter-spacing: -.06em; }
+.mark .h { color: var(--accent); opacity: .45; font-size: 1.35em; }
+.pill { display: inline-flex; align-items: center; gap: 8px; padding: 5px 11px 5px 9px; border-radius: 999px; background: var(--panel); font: 600 13px var(--font); white-space: nowrap; }
+.pill .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+.pill[data-kind=ok] .dot { background: var(--ok); box-shadow: 0 0 0 3px rgba(95,201,138,.2); }
+.pill[data-kind=flow] .dot { background: var(--accent); animation: hi-beat 1.4s ease-in-out infinite; }
+.pill[data-kind=warn] .dot { background: var(--warn); }
+.pill[data-kind=bad] .dot { background: var(--bad); }
+@keyframes hi-beat { 0%, 100% { box-shadow: 0 0 0 0 var(--accent); } 60% { box-shadow: 0 0 0 6px transparent; } }
+h1.head { font: 600 28px/1.15 var(--round); margin: 14px 0 0; letter-spacing: -.01em; }
+h1.page { font: 600 30px/1.15 var(--round); margin: 14px 0 0; }
+h2.sec { font: 600 18px/1.2 var(--round); margin: 26px 0 6px; display: flex; justify-content: space-between; align-items: baseline; }
+.link { border: 0; background: none; padding: 0; color: var(--accent); font: 500 14px var(--font); }
+.banner { margin: 12px 0 0; padding: 12px 14px; border-radius: var(--r-sm); background: #3a1f1c; color: #ffd6d0; }
+.banner.info { background: var(--panel); color: var(--text); }
+.note { color: var(--muted); font-size: 14px; margin: 8px 4px 0; }
+
+/* Three numbers */
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 18px 0 0; }
+.stats > div { min-width: 0; }
+.stats > div:nth-child(2) { text-align: center; }
+.stats > div:nth-child(3) { text-align: right; }
+.num { display: block; font: 600 32px/1.05 var(--round); letter-spacing: -.02em; }
+.unit { color: var(--muted); font-size: 13px; }
+
+/* Events */
+.events { list-style: none; margin: 0; padding: 0; }
+.events li { display: grid; grid-template-columns: 50px 1fr auto; gap: 10px; padding: 10px 0; border-top: 1px solid var(--panel); align-items: baseline; }
+.events li:first-child { border-top: 0; }
+.events time { color: var(--muted); font-size: 13px; }
+.events .what { min-width: 0; font-size: 15px; }
+.events .what small { display: block; color: var(--muted); font-size: 13px; }
+.events .amt { font: 600 15px var(--round); }
+.events .warn .what { color: var(--warn); }
+.events .bad .what { color: var(--bad); }
+.events .ok .what { color: var(--ok); }
+
+/* Dock: swipe + small actions, fixed above the tabs, Live tab only */
+.dock {
+  position: fixed; z-index: 2; left: 0; right: 0; bottom: calc(var(--tabs) + env(safe-area-inset-bottom));
+  padding: 36px max(var(--gap), env(safe-area-inset-left)) 22px;
+  background: linear-gradient(to top, var(--bg) calc(100% - 20px), transparent);
+}
+.dock > * { max-width: 520px; margin-left: auto; margin-right: auto; }
+.chips { display: flex; gap: 8px; margin-top: 18px; }
+.chip { flex: 1; min-width: 0; border: 1px solid var(--line); background: transparent; border-radius: var(--r-sm); padding: 9px 10px; font-size: 14px; text-align: center; text-decoration: none; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.chip[aria-pressed=true] { background: color-mix(in srgb, var(--accent) 18%, transparent); border-color: var(--accent); color: var(--accent); }
+.chip:disabled { opacity: .5; }
+
+/* Swipe: sliding the knob to the end fires once, the moment it gets there */
+.swipe { --sw: var(--accent); position: relative; height: 68px; border-radius: var(--r); border: 2px solid var(--sw); background: var(--panel); overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; transition: border-color .2s; }
+.swipe[data-kind=shut] { --sw: var(--warn); }
+.swipe[data-state=sent] { --sw: var(--ok); }
+.swipe[data-state=error] { --sw: var(--bad); }
+.swipe-fill { position: absolute; inset: 0; transform-origin: left; transform: scaleX(var(--p, 0)); background: var(--sw); opacity: .35; }
+.swipe[data-kind=hazard] .swipe-fill { opacity: 1; background: repeating-linear-gradient(-45deg, var(--sw) 0 14px, var(--bg) 14px 28px); }
+.swipe-text { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); padding: 3px 10px; border-radius: 8px; background: var(--panel); font: 600 16px var(--round); white-space: nowrap; pointer-events: none; }
+.swipe-knob { position: absolute; top: 4px; left: 4px; width: 56px; height: 56px; border: 0; border-radius: 12px; background: var(--sw); color: var(--on-accent); font: 700 30px/1 var(--font); transform: translateX(var(--x, 0px)); touch-action: none; transition: background .2s; }
+.swipe[data-state=sent] .swipe-knob, .swipe[data-state=error] .swipe-knob { color: #fff; }
+.swipe[data-state=busy] .swipe-knob { opacity: .5; }
+.swipe.snap .swipe-knob, .swipe.snap .swipe-fill { transition: transform .2s; }
+
+/* Tabs */
+.tabs {
+  position: fixed; z-index: 3; left: 0; right: 0; bottom: 0; display: flex; justify-content: space-around;
+  padding: 6px 8px calc(6px + env(safe-area-inset-bottom)); background: color-mix(in srgb, var(--bg) 92%, transparent);
+  border-top: 1px solid var(--panel); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+}
+.tabs button { flex: 1; max-width: 120px; border: 0; background: none; color: var(--muted); padding: 4px 0; font-size: 11px; }
+.tabs svg { display: block; margin: 0 auto 2px; width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.tabs button[aria-current=page] { color: var(--accent); }
+
+/* Grouped lists and controls (History, Settings) */
+.list { background: var(--panel); border-radius: 14px; margin: 0; padding: 0; list-style: none; }
+.list li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; min-height: 50px; }
+.list li + li { border-top: 1px solid var(--line); }
+.list li.stack { display: block; }
+.list .k { min-width: 0; }
+.list .k small, .list li.stack small { display: block; color: var(--muted); font-size: 13px; }
+.list .v { color: var(--muted); text-align: right; white-space: nowrap; }
+.plain { border: 0; background: transparent; color: var(--accent); padding: 8px 0; white-space: nowrap; }
+.plain:disabled { opacity: .5; }
+.danger { color: var(--bad); }
+.stepper { display: flex; align-items: center; gap: 6px; }
+.stepper button { border: 0; border-radius: 10px; background: var(--line); padding: 8px 12px; min-width: 40px; }
+.stepper output { min-width: 64px; text-align: center; font: 600 17px var(--round); }
+input[type=number], select { padding: 8px 10px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg); color: var(--text); font: 16px var(--font); }
+input[type=number] { width: 84px; text-align: right; }
+input[type=range] { display: block; width: 100%; margin: 10px 0 2px; accent-color: var(--accent); }
+.switch { position: relative; width: 51px; height: 31px; flex: none; }
+.switch input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.switch i { position: absolute; inset: 0; border-radius: 16px; background: var(--line); transition: background .2s; pointer-events: none; }
+.switch i::after { content: ""; position: absolute; top: 2px; left: 2px; width: 27px; height: 27px; border-radius: 50%; background: var(--text); transition: transform .2s; }
+.switch input:checked + i { background: var(--accent); }
+.switch input:checked + i::after { transform: translateX(20px); }
+.switch input:focus-visible + i { outline: 2px solid var(--accent); outline-offset: 2px; }
+.chips.inline { margin: 10px 4px 0; flex-wrap: wrap; }
+.chips.inline .chip { flex: none; padding: 8px 14px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .pill .dot { animation: none !important; }
+  .swipe.snap .swipe-knob, .swipe.snap .swipe-fill { transition: none; }
+}

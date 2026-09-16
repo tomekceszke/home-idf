@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.1.8 (2026-09-16)
+
+- Shared app shell: `web/app_shell.css` + `web/app_shell.js` + `tools/render_page.py` +
+  `home_idf_app_page(<lib> SRC <app.html> NAME <device>)`. The page keeps its own markup and device logic and pulls
+  in the shell through placeholders (`@HI_APP_CSS@`, `@HI_APP_JS@`, `@HI_APP_WORDMARK@`, `@HI_APP_TABS@`,
+  `@HI_APP_NAME@`); the result is gzipped like `home_idf_embed_gzip()`. One layout for every controller: wordmark and
+  status, headline, three numbers, main view, latest events, then a swipe control and small actions docked above the
+  tabs Live / History / Settings. The script provides `hi.api` (CSRF, timeouts, 401 reload), `hi.tabs`, `hi.swipe`
+  (fires once when the knob reaches the end), `hi.events`, `hi.rows` and duration formatting in words.
+- Development servers call `render_page.render()` so they serve the same page as the firmware.
+
 ## 0.1.7 (2026-09-16)
 
 - `tools/gzip_asset.py`: HTML is minified before gzipping - comments dropped, `<style>` blocks collapsed, markup

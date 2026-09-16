@@ -1,15 +1,55 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Demo</title></head>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>@HI_APP_NAME@</title>
+<style>
+@HI_APP_CSS@
+</style>
+</head>
 <body>
-<pre id="s"></pre><button id="l">Log out</button>
+<main>
+  <section id="live" class="tab">
+    <header class="top">@HI_APP_WORDMARK@<span class="pill" id="pill"><span class="dot"></span><span>Connecting</span></span></header>
+    <h1 class="head">Hello</h1>
+    <div class="stats">
+      <div><span class="num" id="uptime">–</span><span class="unit">running</span></div>
+      <div><span class="num" id="rssi">–</span><span class="unit">dBm Wi-Fi</span></div>
+      <div><span class="num" id="heap">–</span><span class="unit">KB free</span></div>
+    </div>
+    <h2 class="sec">Latest</h2>
+    <ul class="events" id="latest"></ul>
+  </section>
+  <section id="history" class="tab" hidden><h1 class="page">History</h1><ul class="events" id="events"></ul></section>
+  <section id="settings" class="tab" hidden>
+    <h1 class="page">Settings</h1>
+    <h2 class="sec">Device</h2><ul class="list" id="device"></ul>
+    <ul class="list" style="margin-top:16px"><li><div class="k">Sign out</div><button class="plain danger" type="button" id="logout">Sign out</button></li></ul>
+  </section>
+</main>
+<div class="dock" id="dock"><div id="demoSwipe"></div></div>
+@HI_APP_TABS@
 <script>
-let csrf = '';
-const api = (path, body) => fetch(path, body === undefined ? {cache: 'no-store'} : {method: 'POST', cache: 'no-store',
-  headers: {'Content-Type': 'application/json', 'X-CSRF-Token': csrf}, body: JSON.stringify(body)});
+"use strict";
+@HI_APP_JS@
+const log = [];
+hi.tabs();
+hi.swipe($("demoSwipe"), {text: "Slide to log an event", onFire: () => {
+  log.unshift({ts: Date.now() / 1000, what: "Slid to the end", small: "nothing is sent"});
+  hi.events($("latest"), log.slice(0, 3));
+  hi.events($("events"), log);
+}});
 (async () => {
-  csrf = (await (await api('/api/session')).json()).csrf;
-  document.getElementById('s').textContent = JSON.stringify(await (await api('/api/hello')).json(), null, 2);
+  await hi.session();
+  const s = await hi.api("/api/hello");
+  hi.pill($("pill"), "ok", "Online");
+  $("uptime").textContent = hi.uptime(s.uptime_s);
+  $("rssi").textContent = s.wifi.connected ? s.wifi.rssi : "–";
+  $("heap").textContent = s.heap_kb.free;
+  hi.rows($("device"), [["Version", s.version, ""], ["Last restart", s.reset_reason, ""]]);
 })();
-document.getElementById('l').onclick = async () => { await api('/api/logout', {}); location.reload(); };
+$("logout").onclick = async () => { try { await hi.api("/api/logout", {}); } finally { location.reload(); } };
 </script>
-</body></html>
+</body>
+</html>
