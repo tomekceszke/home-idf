@@ -1,6 +1,7 @@
 /* Shared app shell for every controller (inserted into the app page by tools/render_page.py).
    Layout of the Live tab, top to bottom: wordmark + status, headline, three numbers, main view, latest events;
-   swipe and small actions docked above the tabs Live / History / Settings.
+   swipe and small actions docked above the tabs Live / History / Settings. The main view carries class .main-view
+   (phone in landscape and wide windows: main view left, the rest right).
    A page sets its palette on :root: --bg --panel --line --text --muted --accent --on-accent --warn --bad --ok. */
 :root {
   --bg: #0f1e27; --panel: #162a35; --line: #27465a; --text: #e4eff3; --muted: #8aa9b6;
@@ -126,6 +127,54 @@ input[type=range] { display: block; width: 100%; margin: 10px 0 2px; accent-colo
 .switch input:focus-visible + i { outline: 2px solid var(--accent); outline-offset: 2px; }
 .chips.inline { margin: 10px 4px 0; flex-wrap: wrap; }
 .chips.inline .chip { flex: none; padding: 8px 14px; }
+
+/* Phone turned sideways, Live tab: the main view (.main-view) on the left at 4:3, full height above the tabs;
+   wordmark, headline and the three numbers on the right with the dock at the bottom. Latest events stay in History. */
+@media (orientation: landscape) and (max-height: 540px) {
+  body.tab-live {
+    --view-top: calc(12px + env(safe-area-inset-top));
+    --view-h: calc(100dvh - var(--view-top) - var(--tabs) - 12px - env(safe-area-inset-bottom));
+    --view-left: max(var(--gap), env(safe-area-inset-left));
+    --view-w: min(calc(var(--view-h) * 4 / 3), 56vw);
+    --side-left: calc(var(--view-left) + var(--view-w) + 24px);
+    --side-right: max(var(--gap), env(safe-area-inset-right));
+    padding: env(safe-area-inset-top) 0 0;
+  }
+  body.tab-live main { max-width: none; margin: 0; padding: 12px var(--side-right) 0 var(--side-left); }
+  body.tab-live .main-view:not(.full):not(:fullscreen) {
+    position: fixed; z-index: 1; top: var(--view-top); left: var(--view-left); width: var(--view-w); height: var(--view-h);
+    margin: 0; aspect-ratio: auto;
+  }
+  body.tab-live #live .sec, body.tab-live #live .events { display: none; }
+  body.tab-live .dock { left: var(--side-left); padding: 0 var(--side-right) 12px 0; background: none; }
+  body.tab-live .dock > * { max-width: none; }
+}
+
+/* Tablet in portrait and narrow windows: one wider column */
+@media (min-width: 700px) {
+  main { max-width: 680px; }
+  .dock > * { max-width: 640px; }
+}
+
+/* Wide window (desktop, tablet in landscape), Live tab: main view on the left at 4:3, as big as the window allows;
+   a 400 px column on the right with wordmark, headline, numbers, the dock (in the flow, not fixed) and latest events.
+   main and #live become display: contents so their children and the dock share one grid on body. */
+@media (min-width: 900px) and (min-height: 541px) {
+  body.tab-live {
+    --pad: 32px; --side-w: 400px;
+    --view-h: calc(100dvh - 2 * var(--pad) - var(--tabs) - env(safe-area-inset-bottom));
+    --view-w: min(calc(100vw - 2 * var(--pad) - 40px - var(--side-w)), calc(var(--view-h) * 4 / 3));
+    display: grid; grid-template-columns: 1fr var(--view-w) 40px var(--side-w) 1fr;
+    grid-template-rows: repeat(8, auto) 1fr; align-content: start;
+    padding: calc(var(--pad) + env(safe-area-inset-top)) 0 calc(var(--tabs) + var(--pad) + env(safe-area-inset-bottom));
+  }
+  body.tab-live main, body.tab-live #live { display: contents; }
+  body.tab-live .main-view:not(.full):not(:fullscreen) { grid-column: 2; grid-row: 1 / -1; align-self: start; width: 100%; margin: 0; aspect-ratio: 4 / 3; }
+  body.tab-live #live > :not(.main-view), body.tab-live .dock { grid-column: 4; min-width: 0; }
+  body.tab-live .dock { order: 1; position: static; padding: 0; margin-top: 18px; background: none; }
+  body.tab-live .dock > * { max-width: none; }
+  body.tab-live #live .sec, body.tab-live #live .events { order: 2; }
+}
 
 @media (prefers-reduced-motion: reduce) {
   .pill .dot { animation: none !important; }

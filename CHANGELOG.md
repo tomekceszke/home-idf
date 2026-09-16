@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.10 (2026-09-16)
+
+- App shell on phones in landscape (height up to 540 px), Live tab: the main view (`.main-view`, new class for the
+  page's camera or pipe) on the left at 4:3, full height above the tabs; wordmark, headline and the three numbers on
+  the right with the dock at the bottom of that column. Latest events are hidden there (History has them). Portrait,
+  History, Settings and full screen views are unchanged.
+- Wide windows (at least 900×541: desktop, tablet in landscape), Live tab: main view on the left at 4:3 as big as the
+  window allows, a 400 px column on the right with wordmark, headline, numbers, swipe and small actions (in the flow,
+  not docked) and the latest events. From 700 px wide (tablet in portrait) the single column is 680 px instead of 560.
+
 ## 0.1.9 (2026-09-16)
 
 - App shell on phones: value and unit of the three numbers on one line, smaller headline, tighter dock and section
