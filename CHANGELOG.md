@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.9 (2026-09-16)
+
+- App shell on phones: value and unit of the three numbers on one line, smaller headline, tighter dock and section
+  spacing, so the first latest event stays visible above the dock (390×844 with safe areas). Swipe size unchanged.
+
 ## 0.1.8 (2026-09-16)
 
 - Shared app shell: `web/app_shell.css` + `web/app_shell.js` + `tools/render_page.py` +
