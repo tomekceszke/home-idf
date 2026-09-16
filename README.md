@@ -122,7 +122,7 @@ Mutation = session cookie + `Content-Type: application/json` + `X-CSRF-Token` + 
 |---|---|
 | `tools/hash_password.py` | Prompts for a password, prints the `AUTH_PASSWORD_*` defines |
 | `tools/obfuscate.py` | Prompts for a credential, prints `"obf1:..."` for `credentials.h` |
-| `tools/gzip_asset.py` | Deterministic gzip (used by `home_idf_embed_gzip`) |
+| `tools/gzip_asset.py` | Deterministic gzip, minifies HTML comments and `<style>` blocks first (used by `home_idf_embed_gzip`) |
 | `tools/make_icon.py` | 180×180 PNG icon for iOS "Add to Home Screen" |
 | `tools/build_migrator.sh` | Builds a firmware and a migrator project with the firmware's bootloader and partition table embedded |
 

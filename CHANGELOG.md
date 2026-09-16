@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.7 (2026-09-16)
+
+- `tools/gzip_asset.py`: HTML is minified before gzipping - comments dropped, `<style>` blocks collapsed, markup
+  and scripts untouched (whitespace there can be part of the page). Quoted strings and `url()` keep their spacing.
+  Water-controller: sign-in page 1748 -> 1660 B, app 9693 -> 9393 B gzipped, both rendering pixel for pixel the
+  same as before.
+
 ## 0.1.6 (2026-09-16)
 
 - Shared sign-in page: `web/login.html` + `home_idf_login_page(<lib> NAME <device> [ACCENT <#rrggbb>] [ICONS ON|OFF])`,
