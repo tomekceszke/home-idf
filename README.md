@@ -160,6 +160,8 @@ CI builds the example with and without the GCP module.
   circulation pump on a DS18B20 and a relay (whole framework, app shell, `hi_migrator`; the control task keeps
   running whatever the network does)
 - [gate-controller](https://github.com/tomekceszke/gate-controller): garage gate with a live camera (web app shell so far)
+- [heating-controller](https://github.com/tomekceszke/heating-controller): DS18B20 temperatures from two boards into
+  MQTT and PostgreSQL (whole framework, app shell, `hi_migrator`; one binary picks its board by MAC)
 
 ## License
 
