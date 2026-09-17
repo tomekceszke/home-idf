@@ -51,7 +51,7 @@ static bool s_table_new;
 static bool s_bootloader_new;
 static uint32_t s_running_offset;
 static uint32_t s_running_len;
-static char s_report[900];
+static char s_report[1200];
 static char s_error[160];
 
 /* ---------- helpers ---------- */
@@ -197,6 +197,10 @@ static bool run_checks(void)
     report("last reset not a brownout: %s", power_ok ? "ok" : "FAIL (reboot on stable power first)");
     ok &= power_ok;
 
+    char bootloader_idf[33];
+    report("bootloader in flash built with ESP-IDF %s",
+           hi_bootloader_idf(bootloader_idf, sizeof(bootloader_idf)) ? bootloader_idf : "unknown (no description, pre-5.1)");
+
     report("already new: partition table %s, bootloader %s", s_table_new ? "yes" : "no", s_bootloader_new ? "yes" : "no");
     return ok;
 }
@@ -326,9 +330,9 @@ static void install_task(void *arg)
 
 static esp_err_t status_handler(httpd_req_t *req)
 {
-    char *body = malloc(1800);
+    char *body = malloc(2000);
     if (body == NULL) return httpd_resp_send_500(req);
-    char escaped[1000];
+    char escaped[1300];
     size_t j = 0;
     for (size_t i = 0; s_report[i] && j + 2 < sizeof(escaped); i++) {
         if (s_report[i] == '\n') {
@@ -339,7 +343,7 @@ static esp_err_t status_handler(httpd_req_t *req)
         }
     }
     escaped[j] = '\0';
-    snprintf(body, 1800,
+    snprintf(body, 2000,
              "{\"migrator\":\"%s\",\"version\":\"%s\",\"stage\":\"%s\",\"running_offset\":\"0x%06lx\","
              "\"table_new\":%s,\"bootloader_new\":%s,\"error\":\"%s\",\"checks\":\"%s\"}",
              s_cfg.name, esp_app_get_description()->version, STAGE_NAMES[s_stage], (unsigned long) s_running_offset,

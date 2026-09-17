@@ -174,6 +174,9 @@ void hi_httpd_add_system_status(cJSON *root)
     const esp_partition_t *running = esp_ota_get_running_partition();
     cJSON_AddStringToObject(root, "version", app->version);
     cJSON_AddStringToObject(root, "idf", app->idf_ver);
+    char bootloader_idf[33];
+    cJSON_AddStringToObject(root, "bootloader_idf", hi_bootloader_idf(bootloader_idf, sizeof(bootloader_idf))
+                                                        ? bootloader_idf : "unknown");
     cJSON_AddStringToObject(root, "partition", running ? running->label : "?");
     cJSON_AddBoolToObject(root, "pending_verify", hi_health_pending_verify());
     cJSON_AddStringToObject(root, "reset_reason", hi_reset_reason());

@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.12 (2026-09-17)
+
+- `hi_bootloader_idf()`: ESP-IDF version of the bootloader in flash (from its description, ESP-IDF 5.1 and later).
+  Reported as `system.bootloader_idf` by `hi_httpd_add_system_status()` and as a line of the `hi_migrator` checks,
+  so the migrator preflight shows what it is about to replace. Migrator report buffers are larger for the extra line.
+- `tools/dev_proxy.py`: the UI development proxy moved from water-controller, with `--page` and `--name` arguments.
+- `idf_component.yml` version follows the tags again.
+
 ## 0.1.11 (2026-09-17)
 
 - Phone in landscape: the dock is in the flow at the bottom of the right column (grid on body) instead of fixed, so

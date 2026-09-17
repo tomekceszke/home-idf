@@ -140,6 +140,7 @@ Mutation = session cookie + `Content-Type: application/json` + `X-CSRF-Token` + 
 | `tools/obfuscate.py` | Prompts for a credential, prints `"obf1:..."` for `credentials.h` |
 | `tools/render_page.py` | App page with the shared shell (used by `home_idf_app_page` and development servers) |
 | `tools/gzip_asset.py` | Deterministic gzip, minifies HTML comments and `<style>` blocks first (used by `home_idf_embed_gzip`) |
+| `tools/dev_proxy.py` | Serves a controller's `app.html` with the shell locally and forwards `/api` and `/admin` to the device |
 | `tools/make_icon.py` | 180×180 PNG icon for iOS "Add to Home Screen" |
 | `tools/build_migrator.sh` | Builds a firmware and a migrator project with the firmware's bootloader and partition table embedded |
 

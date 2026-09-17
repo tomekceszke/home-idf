@@ -1,4 +1,6 @@
+#include <stdio.h>
 #include "esp_log.h"
+#include "esp_ota_ops.h"
 #include "esp_system.h"
 #include "esp_timer.h"
 #include "nvs_flash.h"
@@ -62,4 +64,14 @@ void hi_restart_soon(uint32_t delay_ms)
     }
     esp_timer_stop(timer);
     esp_timer_start_once(timer, (uint64_t) delay_ms * 1000);
+}
+
+bool hi_bootloader_idf(char *out, size_t out_size)
+{
+    if (out == NULL || out_size == 0) return false;
+    out[0] = '\0';
+    esp_bootloader_desc_t desc;
+    if (esp_ota_get_bootloader_description(NULL, &desc) != ESP_OK) return false;
+    snprintf(out, out_size, "%.*s", (int) sizeof(desc.idf_ver), desc.idf_ver);
+    return true;
 }
