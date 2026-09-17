@@ -155,6 +155,10 @@ CI builds the example with and without the GCP module.
 ## Used by
 
 - [water-controller](https://github.com/tomekceszke/water-controller): anti-flood valve with flow metering
+  (whole framework, GCP module, `hi_migrator`)
+- [floor-heating-controller](https://github.com/tomekceszke/floor-heating-controller): underfloor heating
+  circulation pump on a DS18B20 and a relay (whole framework, app shell, `hi_migrator`; the control task keeps
+  running whatever the network does)
 - [gate-controller](https://github.com/tomekceszke/gate-controller): garage gate with a live camera (web app shell so far)
 
 ## License
