@@ -12,6 +12,8 @@
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; background: var(--bg); color: var(--text); }
+/* iOS home-screen app: on a page shorter than the screen, fixed bars sit a status-bar height above the bottom */
+html { min-height: calc(100% + env(safe-area-inset-top)); }
 body {
   font: 16px/1.45 var(--font); -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent;
   font-variant-numeric: tabular-nums;
@@ -128,25 +130,24 @@ input[type=range] { display: block; width: 100%; margin: 10px 0 2px; accent-colo
 .chips.inline { margin: 10px 4px 0; flex-wrap: wrap; }
 .chips.inline .chip { flex: none; padding: 8px 14px; }
 
-/* Phone turned sideways, Live tab: the main view (.main-view) on the left at 4:3, full height above the tabs;
-   wordmark, headline and the three numbers on the right with the dock at the bottom. Latest events stay in History. */
+/* Phone turned sideways, Live tab: the main view (.main-view) on the left at 4:3, as tall as the space above the tabs;
+   wordmark, headline and the three numbers on the right with the dock at the bottom of that column. The dock is in
+   the flow (grid on body, main and #live display: contents), so a short window (Safari toolbars) scrolls instead of
+   overlapping. Latest events stay in History. */
 @media (orientation: landscape) and (max-height: 540px) {
   body.tab-live {
-    --view-top: calc(12px + env(safe-area-inset-top));
-    --view-h: calc(100dvh - var(--view-top) - var(--tabs) - 12px - env(safe-area-inset-bottom));
-    --view-left: max(var(--gap), env(safe-area-inset-left));
-    --view-w: min(calc(var(--view-h) * 4 / 3), 56vw);
-    --side-left: calc(var(--view-left) + var(--view-w) + 24px);
-    --side-right: max(var(--gap), env(safe-area-inset-right));
-    padding: env(safe-area-inset-top) 0 0;
+    --view-h: calc(100dvh - 24px - var(--tabs) - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    --view-w: min(calc(max(var(--view-h), 150px) * 4 / 3), 50vw);
+    display: grid; min-height: 100dvh;
+    grid-template-columns: max(var(--gap), env(safe-area-inset-left)) var(--view-w) 24px minmax(0, 1fr) max(var(--gap), env(safe-area-inset-right));
+    grid-template-rows: repeat(6, auto) 1fr;
+    padding: calc(12px + env(safe-area-inset-top)) 0 calc(var(--tabs) + 12px + env(safe-area-inset-bottom));
   }
-  body.tab-live main { max-width: none; margin: 0; padding: 12px var(--side-right) 0 var(--side-left); }
-  body.tab-live .main-view:not(.full):not(:fullscreen) {
-    position: fixed; z-index: 1; top: var(--view-top); left: var(--view-left); width: var(--view-w); height: var(--view-h);
-    margin: 0; aspect-ratio: auto;
-  }
+  body.tab-live main, body.tab-live #live { display: contents; }
+  body.tab-live .main-view:not(.full):not(:fullscreen) { grid-column: 2; grid-row: 1 / -1; align-self: start; width: 100%; margin: 0; aspect-ratio: 4 / 3; }
+  body.tab-live #live > :not(.main-view) { grid-column: 4; min-width: 0; }
   body.tab-live #live .sec, body.tab-live #live .events { display: none; }
-  body.tab-live .dock { left: var(--side-left); padding: 0 var(--side-right) 12px 0; background: none; }
+  body.tab-live .dock { grid-column: 4; grid-row: -2; align-self: end; min-width: 0; position: static; padding: 0; margin-top: 12px; background: none; }
   body.tab-live .dock > * { max-width: none; }
 }
 

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.11 (2026-09-17)
+
+- Phone in landscape: the dock is in the flow at the bottom of the right column (grid on body) instead of fixed, so
+  a short window (Safari toolbars) scrolls instead of the dock covering the headline and numbers.
+- iOS home-screen app: a page shorter than the screen left the tabs and dock a status-bar height above the bottom;
+  the document is now at least that much taller than the viewport.
+
 ## 0.1.10 (2026-09-16)
 
 - App shell on phones in landscape (height up to 540 px), Live tab: the main view (`.main-view`, new class for the
