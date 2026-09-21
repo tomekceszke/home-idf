@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.1.13 (2026-09-21)
+
+- `hi_mqtt`: the MQTT client that water-controller and heating-controller each carried a copy of, now shared and
+  behind `CONFIG_HOME_IDF_MQTT`. Publishes to `<prefix>/<mac>/<kind>`, owns the retained `status` topic and its LWT,
+  and reports `hi_mqtt_stats()`. Applications keep their own queue and payloads.
+- `hi_mqtt` retained state topic: with `state_fn` set, a task publishes the application's full status JSON to
+  `<prefix>/<mac>/state`, on a period and on reconnect. A subscriber that has just connected therefore knows the
+  device without asking it anything. `hi_mqtt_state_publish_now()` republishes after a state change and only
+  signals that task, so it is safe to call from a control task or a request handler.
+- `hi_auth`: a second, read-only Authorization value (`readonly_header_value`, checked with
+  `hi_auth_readonly_header_valid()`). The admin value also grants OTA and reboot, which is too much for a permanent
+  reader such as a home-automation bridge. Both values are now compared by one constant-time helper.
+
 ## 0.1.12 (2026-09-17)
 
 - `hi_bootloader_idf()`: ESP-IDF version of the bootloader in flash (from its description, ESP-IDF 5.1 and later).

@@ -26,6 +26,11 @@ typedef struct {
     const char *password_hash_hex;
     /* Authorization header value for admin endpoints (scripts). Empty or NULL locks them. */
     const char *admin_header_value;
+    /* Authorization header value accepted on read-only admin endpoints, for clients that must never be
+     * able to change anything: the admin value also grants OTA and reboot, so handing it to a permanent
+     * subscriber like the Homebridge bridge would put the whole device behind one leaked string.
+     * Empty or NULL means read-only clients have no way in and only the admin value works. */
+    const char *readonly_header_value;
     uint32_t session_ttl_s;         // 0 = 90 days
     uint32_t lockout_max_s;         // failed logins back off 1, 2, 4 ... s up to this; 0 = 300
 } hi_auth_config_t;
@@ -45,4 +50,8 @@ void hi_auth_csrf_token(const hi_auth_session_t *session, char csrf_hex[HI_AUTH_
 void hi_auth_logout(const hi_auth_session_t *session);
 /* Authorization header equals admin_header_value (constant time). */
 bool hi_auth_admin_header_valid(httpd_req_t *req);
+
+/* Authorization header equals readonly_header_value or admin_header_value (constant time). Guard
+ * read-only routes with this and mutating ones with hi_auth_admin_header_valid(). */
+bool hi_auth_readonly_header_valid(httpd_req_t *req);
 uint32_t hi_auth_session_ttl_s(void);

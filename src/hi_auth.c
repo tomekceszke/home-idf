@@ -297,19 +297,40 @@ void hi_auth_logout(const hi_auth_session_t *session)
     ESP_LOGI(TAG, "Logged out");
 }
 
-bool hi_auth_admin_header_valid(httpd_req_t *req)
+/* Reads the header once and compares it against both accepted values, so a read-only request costs the
+ * same whichever value it carries and neither comparison short-circuits on length alone. */
+static bool authorization_matches(httpd_req_t *req, const char *admin, const char *readonly)
 {
-    size_t expected_len = s_config.admin_header_value ? strlen(s_config.admin_header_value) : 0;
-    size_t len = httpd_req_get_hdr_value_len(req, HEADER_AUTHORIZATION);
-    if (expected_len == 0 || len != expected_len) {
-        if (len != 0) ESP_LOGW(TAG, "Admin authorization invalid");
-        return false;
-    }
+    const size_t admin_len = admin ? strlen(admin) : 0;
+    const size_t readonly_len = readonly ? strlen(readonly) : 0;
+    const size_t len = httpd_req_get_hdr_value_len(req, HEADER_AUTHORIZATION);
+    if (len == 0 || (admin_len == 0 && readonly_len == 0)) return false;
+
     char *value = malloc(len + 1);
     if (value == NULL) return false;
-    bool ok = httpd_req_get_hdr_value_str(req, HEADER_AUTHORIZATION, value, len + 1) == ESP_OK
-              && ct_equal((const uint8_t *) value, (const uint8_t *) s_config.admin_header_value, expected_len);
+    bool ok = false;
+    if (httpd_req_get_hdr_value_str(req, HEADER_AUTHORIZATION, value, len + 1) == ESP_OK) {
+        if (admin_len == len && ct_equal((const uint8_t *) value, (const uint8_t *) admin, len)) ok = true;
+        if (readonly_len == len && ct_equal((const uint8_t *) value, (const uint8_t *) readonly, len)) ok = true;
+    }
     free(value);
-    if (!ok) ESP_LOGW(TAG, "Admin authorization invalid");
+    return ok;
+}
+
+bool hi_auth_admin_header_valid(httpd_req_t *req)
+{
+    const bool ok = authorization_matches(req, s_config.admin_header_value, NULL);
+    if (!ok && httpd_req_get_hdr_value_len(req, HEADER_AUTHORIZATION) != 0) {
+        ESP_LOGW(TAG, "Admin authorization invalid");
+    }
+    return ok;
+}
+
+bool hi_auth_readonly_header_valid(httpd_req_t *req)
+{
+    const bool ok = authorization_matches(req, s_config.admin_header_value, s_config.readonly_header_value);
+    if (!ok && httpd_req_get_hdr_value_len(req, HEADER_AUTHORIZATION) != 0) {
+        ESP_LOGW(TAG, "Read-only authorization invalid");
+    }
     return ok;
 }

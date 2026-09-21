@@ -20,6 +20,13 @@ menu "home-idf"
         int "Background OTA task stack (bytes)"
         default 8192
 
+    config HOME_IDF_MQTT
+        bool "MQTT client (telemetry, retained status and state topics)"
+        default n
+        help
+            Publishes to <prefix>/<mac>/<kind> on the local broker, with a retained status topic used as
+            the LWT and an optional retained state topic carrying the device's full status JSON.
+
     config HOME_IDF_GCP
         bool "Google Cloud client (service account JWT -> ID token -> HTTPS POST)"
         default n
