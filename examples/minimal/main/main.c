@@ -20,9 +20,6 @@
 #include "hi_secret.h"
 #include "hi_system.h"
 #include "hi_wifi.h"
-#if CONFIG_HOME_IDF_GCP
-#include "hi_gcp.h"
-#endif
 
 static const char *TAG = "MAIN";
 
@@ -83,12 +80,5 @@ void app_main(void)
 
     hi_health_start(&(hi_health_config_t) {.is_healthy = healthy});
     hi_ota_start_background();
-
-#if CONFIG_HOME_IDF_GCP
-    hi_gcp_init(&(hi_gcp_config_t) {
-        .service_account_email = "device@project.iam.gserviceaccount.com",
-        .private_key_pem = "-----BEGIN PRIVATE KEY-----\n(key)\n-----END PRIVATE KEY-----\n",
-    });
-#endif
     hi_notify_event("Demo", "Device started");
 }

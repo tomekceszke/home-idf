@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        variant: [default, gcp]
+        variant: [default, mqtt]
     steps:
       - uses: actions/checkout@v4
       - name: Build examples/minimal (${{ matrix.variant }})
@@ -31,4 +31,4 @@ jobs:
           path: examples/minimal
           command: >-
             idf.py -B build-${{ matrix.variant }} -D SDKCONFIG=build-${{ matrix.variant }}/sdkconfig
-            -D "SDKCONFIG_DEFAULTS=sdkconfig.defaults${{ matrix.variant == 'gcp' && ';sdkconfig.gcp' || '' }}" build
+            -D "SDKCONFIG_DEFAULTS=sdkconfig.defaults${{ matrix.variant == 'mqtt' && ';sdkconfig.mqtt' || '' }}" build

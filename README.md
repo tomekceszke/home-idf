@@ -16,7 +16,6 @@ projects. It was hardened on devices running 24/7.
 | `hi_notify` | [ntfy](https://ntfy.sh) push notifications through a queue: callers never block, errors are de-duplicated |
 | `hi_auth` | Web login: PBKDF2-SHA256 password, sessions persisted in NVS (hash only), CSRF tokens (HMAC), login back-off, admin header for scripts |
 | `hi_httpd` | HTTP server with guards: Host allowlist (DNS rebinding), Origin + CSRF + JSON for mutations, CSP, common session/UI/admin routes |
-| `hi_gcp` | *Optional* (`CONFIG_HOME_IDF_GCP`): service account JWT → Google ID token → HTTPS POST to Cloud Functions / Cloud Run |
 | `hi_migrator` | *Optional* (`CONFIG_HOME_IDF_MIGRATOR`): one-shot OTA image that moves a legacy two_ota device onto a new bootloader and partition table, then installs the firmware |
 
 ## Design rules
@@ -150,12 +149,12 @@ Mutation = session cookie + `Content-Type: application/json` + `X-CSRF-Token` + 
 ./build.sh                      # ESP-IDF 5.4.2, examples/minimal
 ```
 
-CI builds the example with and without the GCP module.
+CI builds the example with and without the MQTT module.
 
 ## Used by
 
 - [water-controller](https://github.com/tomekceszke/water-controller): anti-flood valve with flow metering
-  (whole framework, GCP module, `hi_migrator`)
+  (whole framework, app shell, `hi_migrator`)
 - [floor-heating-controller](https://github.com/tomekceszke/floor-heating-controller): underfloor heating
   circulation pump on a DS18B20 and a relay (whole framework, app shell, `hi_migrator`; the control task keeps
   running whatever the network does)

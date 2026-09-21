@@ -9,6 +9,9 @@
   `<prefix>/<mac>/state`, on a period and on reconnect. A subscriber that has just connected therefore knows the
   device without asking it anything. `hi_mqtt_state_publish_now()` republishes after a state change and only
   signals that task, so it is safe to call from a control task or a request handler.
+- `hi_gcp` removed, with `CONFIG_HOME_IDF_GCP` and the example's `sdkconfig.gcp`. The GCP backend it posted to is
+  gone (projects deleted 2026-09-21); telemetry goes to the local broker through `hi_mqtt`. The example's CI matrix
+  now builds the MQTT variant instead.
 - `hi_auth`: a second, read-only Authorization value (`readonly_header_value`, checked with
   `hi_auth_readonly_header_valid()`). The admin value also grants OTA and reboot, which is too much for a permanent
   reader such as a home-automation bridge. Both values are now compared by one constant-time helper.

@@ -14,10 +14,6 @@ if(CONFIG_HOME_IDF_MQTT)
     list(APPEND srcs "src/hi_mqtt.c")
 endif()
 
-if(CONFIG_HOME_IDF_GCP)
-    list(APPEND srcs "src/hi_gcp.c")
-endif()
-
 if(CONFIG_HOME_IDF_MIGRATOR)
     list(APPEND srcs "src/hi_migrator.c")
 endif()
