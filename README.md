@@ -14,6 +14,7 @@ projects. It was hardened on devices running 24/7.
 | `hi_ota` | HTTPS OTA from a local server with a pinned certificate, in a background task |
 | `hi_health` | Verifies a new image (app-defined health predicate, reset counting that ignores brownouts) and rolls back to the previous slot |
 | `hi_notify` | [ntfy](https://ntfy.sh) push notifications through a queue: callers never block, errors are de-duplicated |
+| `hi_mqtt` | *Optional* (`CONFIG_HOME_IDF_MQTT`): MQTT to `<prefix>/<mac>/<kind>`, retained `status` (LWT) and `state` topics, subscriptions to retained configuration |
 | `hi_auth` | Web login: PBKDF2-SHA256 password, sessions persisted in NVS (hash only), CSRF tokens (HMAC), login back-off, admin header for scripts |
 | `hi_httpd` | HTTP server with guards: Host allowlist (DNS rebinding), Origin + CSRF + JSON for mutations, CSP, common session/UI/admin routes |
 | `hi_migrator` | *Optional* (`CONFIG_HOME_IDF_MIGRATOR`): one-shot OTA image that moves a legacy two_ota device onto a new bootloader and partition table, then installs the firmware |

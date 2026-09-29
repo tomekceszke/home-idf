@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 #include "cJSON.h"
 #include "esp_err.h"
@@ -46,6 +47,11 @@ typedef struct {
     hi_mqtt_connection_fn_t on_connection;  // optional
 } hi_mqtt_config_t;
 
+/* A message on a subscribed topic, reassembled from its fragments. Runs in the MQTT task: copy what you need and
+ * return; do not block and do not publish from here. len 0 is an empty (retained-delete) message. The buffer is
+ * reused after the call returns. */
+typedef void (*hi_mqtt_message_fn_t)(const char *data, size_t len);
+
 /* Starts the client (and the state task, if configured). Returns ESP_ERR_INVALID_ARG without a password,
  * which is how a device with no broker credentials stays quiet instead of failing to boot. */
 esp_err_t hi_mqtt_start(const hi_mqtt_config_t *config);
@@ -62,6 +68,15 @@ bool hi_mqtt_enabled(void);
  * watchdog on 2026-09-20. Producers hand work to a queue; one task does the talking.
  */
 int hi_mqtt_publish(const char *kind, const char *payload, int qos, bool retain);
+
+/*
+ * Subscribes to <prefix>/<mac>/<kind> at QoS 1, now if connected and again after every reconnect (a retained
+ * message, e.g. a config, therefore arrives on each connection). Messages longer than max_len are dropped.
+ * Up to HI_MQTT_MAX_SUBSCRIPTIONS kinds; call from an application task (it may block briefly on the client lock),
+ * before or after hi_mqtt_start().
+ */
+#define HI_MQTT_MAX_SUBSCRIPTIONS 2
+esp_err_t hi_mqtt_subscribe(const char *kind, size_t max_len, hi_mqtt_message_fn_t cb);
 
 /* Republishes the retained state now instead of waiting for the next period, e.g. after a valve moves.
  * Only signals the state task, so it is safe to call from anywhere, including an HTTP handler. */

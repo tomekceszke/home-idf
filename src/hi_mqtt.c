@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -29,6 +30,18 @@ static char s_status_topic[TOPIC_MAX_LEN];
 static char s_state_topic[TOPIC_MAX_LEN];
 static volatile bool s_connected;
 static volatile uint32_t s_dropped;
+
+typedef struct {
+    char topic[TOPIC_MAX_LEN];
+    char kind[16];
+    size_t max_len;
+    char *buf;
+    hi_mqtt_message_fn_t cb;
+} subscription_t;
+
+static subscription_t s_subs[HI_MQTT_MAX_SUBSCRIPTIONS];
+static int s_sub_count;
+static int s_rx_sub = -1;           // subscription receiving a fragmented message, -1 = none or dropped
 
 const char *hi_mqtt_device_id(void)
 {
@@ -93,6 +106,59 @@ void hi_mqtt_state_publish_now(void)
     if (s_state_task != NULL) xTaskNotifyGive(s_state_task);
 }
 
+static void subscribe_one(subscription_t *sub)
+{
+    if (sub->topic[0] == '\0') {
+        snprintf(sub->topic, sizeof(sub->topic), "%s/%s/%s", s_prefix, s_device_id, sub->kind);
+    }
+    if (esp_mqtt_client_subscribe(s_client, sub->topic, 1) < 0) ESP_LOGW(TAG, "Subscribe to %s failed", sub->topic);
+}
+
+esp_err_t hi_mqtt_subscribe(const char *kind, size_t max_len, hi_mqtt_message_fn_t cb)
+{
+    if (kind == NULL || cb == NULL || max_len == 0 || strlen(kind) >= sizeof(s_subs[0].kind)) return ESP_ERR_INVALID_ARG;
+    if (s_sub_count >= HI_MQTT_MAX_SUBSCRIPTIONS) return ESP_ERR_NO_MEM;
+    char *buf = malloc(max_len);
+    if (buf == NULL) return ESP_ERR_NO_MEM;
+    subscription_t *sub = &s_subs[s_sub_count];
+    *sub = (subscription_t) {.max_len = max_len, .buf = buf, .cb = cb};
+    snprintf(sub->kind, sizeof(sub->kind), "%s", kind);
+    s_sub_count++;
+    if (s_client != NULL && s_connected) subscribe_one(sub);
+    return ESP_OK;
+}
+
+/* esp-mqtt delivers a long message in several DATA events; only the first carries the topic. */
+static void on_data(const esp_mqtt_event_handle_t event)
+{
+    if (event->current_data_offset == 0) {
+        s_rx_sub = -1;
+        for (int i = 0; i < s_sub_count; i++) {
+            if (event->topic_len == (int) strlen(s_subs[i].topic) &&
+                memcmp(event->topic, s_subs[i].topic, event->topic_len) == 0) {
+                s_rx_sub = i;
+                break;
+            }
+        }
+        if (s_rx_sub >= 0 && (size_t) event->total_data_len > s_subs[s_rx_sub].max_len) {
+            ESP_LOGW(TAG, "Dropped %d-byte message on %s (limit %u)", event->total_data_len,
+                     s_subs[s_rx_sub].topic, (unsigned) s_subs[s_rx_sub].max_len);
+            s_rx_sub = -1;
+        }
+    }
+    if (s_rx_sub < 0) return;
+    subscription_t *sub = &s_subs[s_rx_sub];
+    if ((size_t) (event->current_data_offset + event->data_len) > sub->max_len) {
+        s_rx_sub = -1;
+        return;
+    }
+    memcpy(sub->buf + event->current_data_offset, event->data, event->data_len);
+    if (event->current_data_offset + event->data_len >= event->total_data_len) {
+        sub->cb(sub->buf, (size_t) event->total_data_len);
+        s_rx_sub = -1;
+    }
+}
+
 static void on_mqtt_event(void *arg, esp_event_base_t base, int32_t event_id, void *event_data)
 {
     const esp_mqtt_event_handle_t event = event_data;
@@ -103,7 +169,11 @@ static void on_mqtt_event(void *arg, esp_event_base_t base, int32_t event_id, vo
         esp_mqtt_client_enqueue(s_client, s_status_topic, "online", 0, 1, 1, true);
         /* Refresh the retained state so a subscriber never sees one from before the outage. */
         hi_mqtt_state_publish_now();
+        for (int i = 0; i < s_sub_count; i++) subscribe_one(&s_subs[i]);
         if (s_on_connection) s_on_connection(true);
+        break;
+    case MQTT_EVENT_DATA:
+        on_data(event);
         break;
     case MQTT_EVENT_DISCONNECTED:
         s_connected = false;

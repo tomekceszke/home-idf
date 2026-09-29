@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.14 (2026-09-29)
+
+- `hi_mqtt_subscribe()`: receive messages on `<prefix>/<mac>/<kind>` (QoS 1). The subscription is renewed on every
+  reconnect, so a retained message such as a configuration arrives on each connection. Fragmented messages are
+  reassembled up to a per-subscription limit; larger ones are dropped. The callback runs in the MQTT task and must
+  not block (same rule as `on_connection`).
+
 ## 0.1.13 (2026-09-21)
 
 - `hi_mqtt`: the MQTT client that water-controller and heating-controller each carried a copy of, now shared and
