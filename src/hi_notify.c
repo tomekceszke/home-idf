@@ -19,8 +19,10 @@ static const char *TAG = "HI_NOTIFY";
 #define TAGS_SIZE  32
 #define DEDUP_SLOTS 8
 
+typedef enum { CH_EVENT, CH_WARNING, CH_ERROR, CH_ALARM } channel_t;
+
 typedef struct {
-    bool is_error;
+    uint8_t channel;
     uint8_t priority;
     char title[TITLE_SIZE];
     char message[MSG_SIZE];
@@ -107,10 +109,19 @@ static void notify_task(void *arg)
     for (;;) {
         if (xQueueReceive(s_queue, &item, portMAX_DELAY) != pdTRUE) continue;
         if (!hi_wifi_is_connected()) continue;
-        if (item.is_error) {
+        switch ((channel_t) item.channel) {
+        case CH_ERROR:
             if (dedup_should_send(item.message)) post_ntfy(s_config.error_topic, &item);
-        } else {
+            break;
+        case CH_ALARM:
+            post_ntfy(empty(s_config.error_topic) ? s_config.topic : s_config.error_topic, &item);
+            break;
+        case CH_WARNING:
+            post_ntfy(empty(s_config.warning_topic) ? s_config.topic : s_config.warning_topic, &item);
+            break;
+        default:
             post_ntfy(s_config.topic, &item);
+            break;
         }
     }
 }
@@ -119,7 +130,7 @@ void hi_notify_init(const hi_notify_config_t *config)
 {
     s_config = *config;
     if (s_config.error_title == NULL) s_config.error_title = "Device error";
-    if (empty(s_config.topic) && empty(s_config.error_topic)) return;
+    if (empty(s_config.topic) && empty(s_config.warning_topic) && empty(s_config.error_topic)) return;
     s_queue = xQueueCreate(s_config.queue_size ? s_config.queue_size : 6, sizeof(item_t));
     if (s_queue == NULL
         || xTaskCreate(notify_task, "hi_notify", CONFIG_HOME_IDF_NOTIFY_TASK_STACK, NULL, 3, NULL) != pdPASS) {
@@ -128,10 +139,10 @@ void hi_notify_init(const hi_notify_config_t *config)
     }
 }
 
-static void enqueue(bool is_error, const char *title, const char *message, uint8_t priority, const char *tags)
+static void enqueue(channel_t channel, const char *title, const char *message, uint8_t priority, const char *tags)
 {
     if (s_queue == NULL) return;
-    item_t item = {.is_error = is_error, .priority = priority};
+    item_t item = {.channel = (uint8_t) channel, .priority = priority};
     snprintf(item.title, sizeof(item.title), "%s", title);
     snprintf(item.message, sizeof(item.message), "%s", message);
     snprintf(item.tags, sizeof(item.tags), "%s", tags ? tags : "");
@@ -146,13 +157,25 @@ void hi_notify_event(const char *title, const char *message)
 void hi_notify_event_ex(const char *title, const char *message, hi_notify_priority_t priority, const char *tags)
 {
     if (empty(s_config.topic)) return;
-    enqueue(false, title, message, (uint8_t) priority, tags);
+    enqueue(CH_EVENT, title, message, (uint8_t) priority, tags);
+}
+
+void hi_notify_warning_ex(const char *title, const char *message, hi_notify_priority_t priority, const char *tags)
+{
+    if (empty(s_config.warning_topic) && empty(s_config.topic)) return;
+    enqueue(CH_WARNING, title, message, (uint8_t) priority, tags);
+}
+
+void hi_notify_alarm_ex(const char *title, const char *message, hi_notify_priority_t priority, const char *tags)
+{
+    if (empty(s_config.error_topic) && empty(s_config.topic)) return;
+    enqueue(CH_ALARM, title, message, (uint8_t) priority, tags);
 }
 
 void hi_notify_error(const char *message)
 {
     if (empty(s_config.error_topic) || s_error_suppressed) return;
-    enqueue(true, s_config.error_title, message, HI_NOTIFY_PRIO_HIGH, "warning");
+    enqueue(CH_ERROR, s_config.error_title, message, HI_NOTIFY_PRIO_HIGH, "warning");
 }
 
 void hi_notify_error_suppress(bool suppress)

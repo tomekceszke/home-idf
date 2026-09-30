@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.15 (2026-09-30)
+
+- `hi_notify`: a third topic, `warning_topic`, for things to look at when convenient (`hi_notify_warning_ex()`), and
+  `hi_notify_alarm_ex()` for "the device acted or failed to protect": alarms go to the error topic, which owners keep
+  loud, without the error de-duplication or suppression. Without `warning_topic` warnings go to `topic`, so existing
+  applications behave as before.
+
 ## 0.1.14 (2026-09-29)
 
 - `hi_mqtt_subscribe()`: receive messages on `<prefix>/<mac>/<kind>` (QoS 1). The subscription is renewed on every

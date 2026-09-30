@@ -13,8 +13,9 @@ typedef enum {
 
 typedef struct {
     const char *server;             // NULL = "https://ntfy.sh"
-    const char *topic;              // events; "" or NULL disables
-    const char *error_topic;        // errors; "" or NULL disables
+    const char *topic;              // events (info); "" or NULL disables
+    const char *warning_topic;      // warnings; "" or NULL sends them to `topic`
+    const char *error_topic;        // errors and alarms; "" or NULL disables errors (alarms then go to `topic`)
     const char *error_title;        // e.g. "Water controller error"
     const char *click_url;          // optional: opened when the notification is tapped
     uint32_t error_cooldown_s;      // same error text is sent at most once per window
@@ -27,6 +28,13 @@ void hi_notify_init(const hi_notify_config_t *config);
 void hi_notify_event(const char *title, const char *message);
 /* tags: comma-separated ntfy tags/emoji shortcodes, may be NULL. */
 void hi_notify_event_ex(const char *title, const char *message, hi_notify_priority_t priority, const char *tags);
+
+/* Something to look at when convenient (e.g. an unusual flow): the warning topic. */
+void hi_notify_warning_ex(const char *title, const char *message, hi_notify_priority_t priority, const char *tags);
+
+/* The device acted to protect something or failed at it (e.g. a valve shut off): the error topic, which the owner
+ * keeps loud. Unlike errors, alarms are neither de-duplicated nor suppressed. */
+void hi_notify_alarm_ex(const char *title, const char *message, hi_notify_priority_t priority, const char *tags);
 
 void hi_notify_error(const char *message);
 /* Temporarily mute errors (e.g. expected failures during OTA). */
