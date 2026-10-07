@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.16 (2026-10-07)
+
+- Targets: esp32c3 and esp32s3 next to esp32 (meters-controller and heatronic-controller run on an ESP32-C3).
+  Nothing in the library was target-specific: no task is pinned to a core and no ESP32-only API is used, so the
+  change is the component manifest and a CI build of the MQTT example for both chips.
+
 ## 0.1.15 (2026-09-30)
 
 - `hi_notify`: a third topic, `warning_topic`, for things to look at when convenient (`hi_notify_warning_ex()`), and

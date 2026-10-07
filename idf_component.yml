@@ -1,9 +1,11 @@
-version: "0.1.15"
+version: "0.1.16"
 description: Shared ESP-IDF framework for home controllers (WiFi, logging, NTP, OTA, health/rollback, ntfy, MQTT, web auth and API guards)
 url: https://github.com/tomekceszke/home-idf
 license: MIT
 targets:
   - esp32
+  - esp32c3
+  - esp32s3
 dependencies:
   idf: ">=5.4"
 files:

@@ -21,14 +21,21 @@ jobs:
     strategy:
       matrix:
         variant: [default, mqtt]
+        target: [esp32]
+        include:
+          - variant: mqtt
+            target: esp32c3
+          - variant: mqtt
+            target: esp32s3
     steps:
       - uses: actions/checkout@v4
-      - name: Build examples/minimal (${{ matrix.variant }})
+      - name: Build examples/minimal (${{ matrix.variant }}, ${{ matrix.target }})
         uses: espressif/esp-idf-ci-action@v1
         with:
           esp_idf_version: v5.4.2
-          target: esp32
+          target: ${{ matrix.target }}
           path: examples/minimal
           command: >-
-            idf.py -B build-${{ matrix.variant }} -D SDKCONFIG=build-${{ matrix.variant }}/sdkconfig
+            idf.py -B build-${{ matrix.variant }}-${{ matrix.target }} -D SDKCONFIG=build-${{ matrix.variant }}-${{ matrix.target }}/sdkconfig
+            -D IDF_TARGET=${{ matrix.target }}
             -D "SDKCONFIG_DEFAULTS=sdkconfig.defaults${{ matrix.variant == 'mqtt' && ';sdkconfig.mqtt' || '' }}" build
