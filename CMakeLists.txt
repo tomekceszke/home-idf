@@ -8,7 +8,8 @@ set(srcs
     "src/hi_notify.c"
     "src/hi_health.c"
     "src/hi_auth.c"
-    "src/hi_httpd.c")
+    "src/hi_httpd.c"
+    "src/hi_deadband.c")
 
 if(CONFIG_HOME_IDF_MQTT)
     list(APPEND srcs "src/hi_mqtt.c")

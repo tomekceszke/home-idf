@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.17 (2026-10-15)
+
+- `hi_deadband`: decides when a value that is read often is worth sending: the first reading, a change of at least
+  `delta` from the last value sent, or `max_gap_s` since then. heatronic-controller and heating-controller read their
+  DS18B20s every 5 s with it and send on a change of 0.2 °C or at least once a minute, so a burner cycle of a few
+  minutes is no longer three points. Pure C, host-tested (`test/test_deadband.c`, in CI).
+
 ## 0.1.16 (2026-10-07)
 
 - Targets: esp32c3 and esp32s3 next to esp32 (meters-controller and heatronic-controller run on an ESP32-C3).

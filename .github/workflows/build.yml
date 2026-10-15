@@ -15,6 +15,10 @@ jobs:
           value='Zażółć gęślą jaźń 123!'
           obf=$(python3 -c "import sys; sys.path.insert(0, 'tools'); import obfuscate; print(obfuscate.obfuscate(sys.argv[1]))" "$value")
           ./test_secret "$obf" "$value"
+      - name: hi_deadband
+        run: |
+          cc -Wall -Wextra -Werror -I include src/hi_deadband.c test/test_deadband.c -lm -o test_deadband
+          ./test_deadband
 
   example:
     runs-on: ubuntu-latest
