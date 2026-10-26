@@ -19,6 +19,12 @@ jobs:
         run: |
           cc -Wall -Wextra -Werror -I include src/hi_deadband.c test/test_deadband.c -lm -o test_deadband
           ./test_deadband
+      - name: design tokens (match app_shell.css, generated header)
+        run: |
+          python3 tools/design_tokens.py check
+          python3 tools/design_tokens.py header thermostat design-out/hi_design_thermostat.h
+          cc -Wall -Wextra -Werror -I design-out test/test_design.c -o test_design
+          ./test_design
 
   example:
     runs-on: ubuntu-latest

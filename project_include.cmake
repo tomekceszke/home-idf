@@ -66,6 +66,34 @@ function(home_idf_login_page lib)
     home_idf_embed_gzip(${lib} ${rendered})
 endfunction()
 
+# home_idf_design(<component lib> VIEW <view> [LVGL_FONTS])
+# Generates hi_design_<view>.h from design/tokens.json and design/views/<view>/view.json (tools/design_tokens.py:
+# colours, geometry, layout, labels, icons) and puts it on the component's include path. LVGL_FONTS also compiles
+# the committed fonts of design/fonts/generated/lvgl into the component (it must require lvgl) and makes
+# hi_design_fonts.h includable.
+function(home_idf_design lib)
+    cmake_parse_arguments(ARG "LVGL_FONTS" "VIEW" "" ${ARGN})
+    if(NOT ARG_VIEW)
+        message(FATAL_ERROR "home_idf_design: VIEW is required")
+    endif()
+    idf_build_get_property(python PYTHON)
+    set(view_json ${HOME_IDF_DIR}/design/views/${ARG_VIEW}/view.json)
+    set(out_dir ${CMAKE_CURRENT_BINARY_DIR}/design)
+    set(header ${out_dir}/hi_design_${ARG_VIEW}.h)
+    add_custom_command(OUTPUT ${header}
+            COMMAND ${python} ${HOME_IDF_TOOLS_DIR}/design_tokens.py header ${ARG_VIEW} ${header}
+            DEPENDS ${HOME_IDF_TOOLS_DIR}/design_tokens.py ${HOME_IDF_DIR}/design/tokens.json ${view_json}
+            VERBATIM)
+    add_custom_target(home_idf_design_${ARG_VIEW} DEPENDS ${header})
+    add_dependencies(${lib} home_idf_design_${ARG_VIEW})
+    target_include_directories(${lib} PRIVATE ${out_dir})
+    if(ARG_LVGL_FONTS)
+        file(GLOB fonts ${HOME_IDF_DIR}/design/fonts/generated/lvgl/hi_font_*.c)
+        target_sources(${lib} PRIVATE ${fonts})
+        target_include_directories(${lib} PRIVATE ${HOME_IDF_DIR}/design/fonts/generated/lvgl)
+    endif()
+endfunction()
+
 # home_idf_app_page(<component lib> SRC <app.html> NAME <device name>)
 # Renders the app page with the shared shell (web/app_shell.css, web/app_shell.js, wordmark, tab bar; see
 # tools/render_page.py for the placeholders) and embeds it like home_idf_embed_gzip() would, as

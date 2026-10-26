@@ -144,6 +144,14 @@ Mutation = session cookie + `Content-Type: application/json` + `X-CSRF-Token` + 
 | `tools/dev_proxy.py` | Serves a controller's `app.html` with the shell locally and forwards `/api` and `/admin` to the device |
 | `tools/make_icon.py` | 180×180 PNG icon for iOS "Add to Home Screen" |
 | `tools/build_migrator.sh` | Builds a firmware and a migrator project with the firmware's bootloader and partition table embedded |
+| `tools/design_tokens.py` | C header and CSS from `design/` (used by `home_idf_design()`), `check` against the shell (CI) |
+| `tools/make_fonts.py` | Regenerates the committed web and LVGL fonts in `design/fonts/generated` (uvx + npx) |
+
+## Design
+
+[`design/`](design/README.md) keeps the look of the app pages and the wall panels as data (tokens, views, fonts),
+because CSS cannot reach an LVGL panel. A panel takes a view with
+`home_idf_design(${COMPONENT_LIB} VIEW thermostat LVGL_FONTS)`.
 
 ## Build the example
 

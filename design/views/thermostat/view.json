@@ -1,0 +1,147 @@
+{
+  "_doc": "Thermostat view: the room panels' rendering of heatronic/<mac>/thermostat (heatronic-controller docs/DATA.md, Thermostat view). One source for the app page on the heatronic board (phone, desktop) and the wall panel (wall-panel, LVGL). Geometry is given at the base size 328 px; a renderer scales it by its dial size / 328 (the 480x480 panel draws the dial at 328, so 1:1). Colours name a token of design/tokens.json or of colors below.",
+
+  "range": {"min_c": 15, "max_c": 25, "step_c": 0.5},
+
+  "format": {
+    "_doc": "One decimal with a point, as the page (toFixed(1)); missing or stale values show the dash. Burner and DHW temperature are whole numbers.",
+    "decimals": 1,
+    "missing": "–",
+    "stale_after_s": 120
+  },
+
+  "colors": {
+    "heat": "#f08a3c",
+    "dhw": "#56c2e6",
+    "idle": "#4a6b7b",
+    "fault-arc": "#6b3a36",
+    "track": "#1e3440",
+    "tick": "#3f5e6d",
+    "accent": "#f08a3c",
+    "on-accent": "#1b1210"
+  },
+
+  "dial": {
+    "base": 328,
+    "center": 164,
+    "radius": 146,
+    "start_deg": 135,
+    "span_deg": 270,
+    "track_width": 16,
+    "knob_r": 13,
+    "knob_stroke": 4,
+    "dot_r": 5,
+    "ticks": {"every_c": 1, "major_every_c": 5, "inner": 14, "minor_outer": 18, "major_outer": 24, "width": 2},
+    "text": {
+      "label":     {"dy": -62, "size": 15, "weight": 400, "letter_spacing": 2, "color": "muted"},
+      "set":       {"dy": 22, "size": 84, "weight": 600, "letter_spacing": -3, "color": "text"},
+      "set_unit":  {"dy": -36, "size": 36, "weight": 600, "color": "text"},
+      "now":       {"dy": 62, "size": 19, "weight": 400, "color": "muted"},
+      "now_value": {"size": 19, "weight": 600, "color": "text"},
+      "source":    {"dy": 86, "size": 13, "weight": 400, "color": "muted", "opacity": 0.8}
+    },
+    "buttons": {"dx": 46, "dy_factor": 0.78, "r": 22, "glyph_size": 28}
+  },
+
+  "states": {
+    "_doc": "By the document's state (and flame for heat). arc = colour of the fill and the knob, pill = the shell's pill kind on the page, icon = an entry of icons. The panel's state line is icon + short (in label_color) + detail (muted); {0} = burner %, DHW temperature (whole degrees), fault code or fault text.",
+    "heat_flame": {"arc": "heat", "pill": "flow", "icon": "flame", "icon_color": "heat", "label_color": "heat",
+                   "headline": {"en": "Heating · burner {0} %", "pl": "Grzanie · palnik {0} %"},
+                   "short": {"en": "Heating", "pl": "Ogrzewanie"},
+                   "detail": {"en": "· burner {0} %", "pl": "· palnik {0} %"}},
+    "heat":       {"arc": "heat", "pill": "heat", "icon": "flame", "icon_color": "muted", "label_color": "heat",
+                   "headline": {"en": "Heating · burner paused", "pl": "Grzanie · przerwa palnika"},
+                   "short": {"en": "Heating", "pl": "Ogrzewanie"},
+                   "detail": {"en": "· burner paused", "pl": "· przerwa palnika"}},
+    "dhw":        {"arc": "dhw", "pill": "dhw", "icon": "drop", "icon_color": "dhw", "label_color": "dhw",
+                   "headline": {"en": "Charging hot water{0}", "pl": "Grzanie ciepłej wody{0}"},
+                   "short": {"en": "Hot water", "pl": "Ciepła woda"},
+                   "detail": {"en": "· {0} °C", "pl": "· {0} °C"}},
+    "idle":       {"arc": "idle", "pill": "ok", "icon": "pause", "icon_color": "muted", "label_color": "text",
+                   "headline": {"en": "Idle", "pl": "Spoczynek"},
+                   "short": {"en": "Idle", "pl": "Spoczynek"},
+                   "detail": {"en": "", "pl": ""}},
+    "fault":      {"arc": "fault-arc", "pill": "bad", "icon": "warning", "icon_color": "bad", "label_color": "bad",
+                   "headline": {"en": "Boiler fault {0}", "pl": "Usterka kotła {0}"},
+                   "short": {"en": "Fault", "pl": "Usterka"},
+                   "detail": {"en": "· {0}", "pl": "· {0}"}},
+    "unknown":    {"arc": "idle", "pill": "warn", "icon": "offline", "icon_color": "warn", "label_color": "warn",
+                   "headline": {"en": "No data from the boiler", "pl": "Brak danych z kotła"},
+                   "short": {"en": "No data", "pl": "Brak danych"},
+                   "detail": {"en": "from the boiler", "pl": "z kotła"}}
+  },
+
+  "faults": {
+    "locking":  {"en": "Boiler locked out", "pl": "Kocioł zablokowany"},
+    "blocking": {"en": "Boiler blocking error", "pl": "Błąd blokujący kotła"}
+  },
+
+  "modes": {
+    "day":     {"icon": "sun",       "label": {"en": "Day program", "pl": "Program dzienny"}},
+    "night":   {"icon": "moon",      "label": {"en": "Night program", "pl": "Program nocny"}},
+    "frost":   {"icon": "snowflake", "label": {"en": "Frost protection", "pl": "Ochrona przed mrozem"}},
+    "pause":   {"icon": "snowflake", "label": {"en": "Paused until the next program switch", "pl": "Pauza do następnego przełączenia programu"}},
+    "unknown": {"icon": null,        "label": {"en": "Program unknown", "pl": "Program nieznany"}}
+  },
+
+  "sources": {
+    "fw100": {"en": "FW100", "pl": "FW100"},
+    "w100":  {"en": "W100 · living room", "pl": "W100 · salon"}
+  },
+
+  "texts": {
+    "set_point":    {"en": "SET POINT", "pl": "ZADANA"},
+    "now":          {"en": "now", "pl": "teraz"},
+    "override":     {"en": " · set here or on the W100", "pl": " · ustawione tutaj lub na W100"},
+    "outdoor":      {"en": "out", "pl": "zewn."},
+    "last_reading": {"en": "Last reading {0} ago", "pl": "Ostatni odczyt {0} temu"},
+    "waiting":      {"en": "Waiting for data", "pl": "Czekam na dane"},
+    "days":         {"en": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"], "pl": ["nd", "pn", "wt", "śr", "cz", "pt", "sb"]}
+  },
+
+  "icons": {
+    "_doc": "Material Symbols Rounded, filled (FILL 1, wght 400, GRAD 0, opsz 24): name -> codepoint.",
+    "flame":     "ef55",
+    "drop":      "e798",
+    "pause":     "e034",
+    "warning":   "f083",
+    "offline":   "e2c1",
+    "sun":       "e518",
+    "moon":      "f159",
+    "snowflake": "eb3b"
+  },
+
+  "panel": {
+    "_doc": "Wall panel 480x480 (mockup/index.html): dial at 328 px, top-left corner (76, 58). Text sizes in px. Top bar: day and date, clock, outdoor temperature.",
+    "width": 480,
+    "height": 480,
+    "bg": "#0b161c",
+    "dial_size": 328,
+    "dial_x": 76,
+    "dial_y": 58,
+    "top":   {"y": 16, "x": 24, "size": 20, "weight": 400, "color": "muted", "value_weight": 600,
+              "clock_size": 26, "clock_weight": 600},
+    "state": {"bottom": 22, "size": 22, "weight": 600, "icon_size": 22, "gap": 9},
+    "prog":  {"size": 17, "weight": 400, "color": "muted", "gap": 6},
+    "fonts": [
+      {"name": "nunito_13", "weight": 400, "size": 13, "glyphs": "text"},
+      {"name": "nunito_15", "weight": 400, "size": 15, "glyphs": "text"},
+      {"name": "nunito_17", "weight": 400, "size": 17, "glyphs": "text", "icons": true},
+      {"name": "nunito_19", "weight": 400, "size": 19, "glyphs": "text"},
+      {"name": "nunito_20", "weight": 400, "size": 20, "glyphs": "text"},
+      {"name": "nunito_28", "weight": 400, "size": 28, "glyphs": "signs"},
+      {"name": "nunito_semibold_19", "weight": 600, "size": 19, "glyphs": "digits"},
+      {"name": "nunito_semibold_20", "weight": 600, "size": 20, "glyphs": "digits"},
+      {"name": "nunito_semibold_22", "weight": 600, "size": 22, "glyphs": "text", "icons": true},
+      {"name": "nunito_semibold_26", "weight": 600, "size": 26, "glyphs": "digits"},
+      {"name": "nunito_semibold_36", "weight": 600, "size": 36, "glyphs": "digits"},
+      {"name": "nunito_semibold_84", "weight": 600, "size": 84, "glyphs": "digits"}
+    ],
+    "glyph_sets": {
+      "_doc": "text = printable ASCII, Polish letters and the signs below; digits = what numbers and the clock need.",
+      "text": "ASCII ąćęłńóśźżĄĆĘŁŃÓŚŹŻ°·–−",
+      "digits": "0123456789.,:–−°% ",
+      "signs": "+−"
+    }
+  }
+}

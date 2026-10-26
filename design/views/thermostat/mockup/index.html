@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Termostat – makieta</title>
+<style>
+  :root {
+    --bg: #0f1e27; --panel: #162a35; --line: #27465a; --text: #e4eff3; --muted: #8aa9b6;
+    --accent: #f08a3c; --heat: #f08a3c; --dhw: #56c2e6; --idle: #3b5868; --warn: #f2a541; --bad: #ff6f5e; --ok: #5fc98a;
+    --round: ui-rounded, "SF Pro Rounded", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --font: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --page: #0a141a;
+  }
+  :root[data-theme=light] {
+    --bg: #f4f7f8; --panel: #e6eef1; --line: #c8d7de; --text: #13242d; --muted: #5d7783;
+    --idle: #c3d2d9; --page: #dfe7ea;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--page); color: var(--text); font: 15px/1.45 var(--font); font-variant-numeric: tabular-nums; }
+  header.bar { max-width: 1180px; margin: 0 auto; padding: 20px 16px 8px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; }
+  header.bar h1 { font: 600 20px var(--round); margin: 0; }
+  .ctl { display: flex; flex-wrap: wrap; gap: 6px; }
+  .ctl button { border: 1px solid var(--line); background: var(--bg); color: var(--text); border-radius: 10px; padding: 7px 12px; font: 500 14px var(--font); cursor: pointer; }
+  .ctl button[aria-pressed=true] { border-color: var(--accent); color: var(--accent); }
+  .stage { max-width: 1180px; margin: 0 auto; padding: 8px 16px 40px; display: flex; flex-wrap: wrap; gap: 32px; align-items: flex-start; justify-content: center; }
+  figure { margin: 0; }
+  figcaption { color: var(--muted); font-size: 13px; margin-top: 10px; text-align: center; }
+
+  /* Wall panel: 480x480 screen in an 86 mm module */
+  .bezel { padding: 22px; border-radius: 22px; background: #050809; box-shadow: 0 12px 40px rgba(0,0,0,.45), inset 0 0 0 1px #1d2a30; }
+  .screen { width: 480px; height: 480px; background: #0b161c; color: #e4eff3; position: relative; overflow: hidden; font-family: var(--round); }
+  .screen.dim { filter: brightness(.35); }
+  .screen .top { position: absolute; left: 24px; right: 24px; top: 16px; display: flex; justify-content: space-between; align-items: baseline; font-size: 20px; color: #8aa9b6; }
+  .screen .top .clock { font-size: 26px; color: #e4eff3; font-weight: 600; }
+  .screen .top .out b { color: #e4eff3; font-weight: 600; }
+  .screen svg.dial { position: absolute; left: 76px; top: 58px; }
+  .screen .lines { position: absolute; left: 24px; right: 24px; bottom: 22px; text-align: center; }
+  .screen .state { font-size: 22px; font-weight: 600; display: flex; gap: 9px; justify-content: center; align-items: center; }
+  .screen .prog { font-size: 17px; color: #8aa9b6; margin-top: 6px; }
+  .scale { zoom: .5; }
+  .strip { max-width: 1180px; margin: 0 auto; padding: 0 16px 40px; display: flex; flex-wrap: wrap; gap: 18px; justify-content: center; }
+  .strip h2 { width: 100%; font: 600 16px var(--round); margin: 0; color: var(--muted); text-align: center; }
+
+  /* Phone: the home-idf app shell, dial as the main view */
+  .phone { width: 390px; height: 800px; border-radius: 44px; padding: 14px; background: #050809; box-shadow: 0 12px 40px rgba(0,0,0,.45); }
+  .app { height: 100%; border-radius: 32px; background: var(--bg); overflow: hidden; position: relative; padding: 34px 20px 0; }
+  .app .top { display: flex; justify-content: space-between; align-items: center; min-height: 40px; }
+  .mark { font: 700 21px/1 var(--font); letter-spacing: -.04em; }
+  .mark .p { color: var(--accent); font-size: 1.35em; text-transform: uppercase; letter-spacing: -.06em; }
+  .pill { display: inline-flex; align-items: center; gap: 8px; padding: 5px 11px 5px 9px; border-radius: 999px; background: var(--panel); font: 600 13px var(--font); }
+  .pill .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+  .pill[data-kind=heat] .dot { background: var(--heat); box-shadow: 0 0 0 3px rgba(240,138,60,.25); }
+  .pill[data-kind=dhw] .dot { background: var(--dhw); }
+  .pill[data-kind=ok] .dot { background: var(--ok); }
+  .pill[data-kind=warn] .dot { background: var(--warn); }
+  .pill[data-kind=bad] .dot { background: var(--bad); }
+  h1.head { font: 600 22px/1.15 var(--round); margin: 10px 0 0; }
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 14px 0 0; }
+  .stats > div:nth-child(2) { text-align: center; }
+  .stats > div:nth-child(3) { text-align: right; }
+  .num { font: 600 26px/1.1 var(--round); letter-spacing: -.02em; }
+  .num.stale { color: var(--muted); }
+  .unit { color: var(--muted); font-size: 13px; display: block; }
+  .main-view { margin: 10px auto 0; display: flex; flex-direction: column; align-items: center; }
+  .main-view .prog { color: var(--muted); font: 15px var(--round); margin-top: -6px; }
+  h2.sec { font: 600 18px var(--round); margin: 18px 0 6px; }
+  .events { list-style: none; margin: 0; padding: 0; }
+  .events li { display: grid; grid-template-columns: 50px 1fr; gap: 10px; padding: 9px 0; border-top: 1px solid var(--panel); }
+  .events li:first-child { border-top: 0; }
+  .events time { color: var(--muted); font-size: 13px; }
+  .tabs { position: absolute; left: 0; right: 0; bottom: 0; height: 64px; display: flex; border-top: 1px solid var(--panel); background: var(--bg); }
+  .tabs span { flex: 1; text-align: center; padding-top: 12px; font: 600 13px var(--font); color: var(--muted); }
+  .tabs span.on { color: var(--accent); }
+  .notes { max-width: 860px; margin: 0 auto; padding: 0 16px 48px; color: var(--muted); }
+  .notes li { margin: 4px 0; }
+  @media (max-width: 560px) { .bezel { transform: scale(.66); transform-origin: top center; margin-bottom: -170px; } }
+</style>
+</head>
+<body>
+<header class="bar">
+  <h1>Termostat – makieta panelu 480×480 i strony</h1>
+  <div class="ctl" id="states"></div>
+  <div class="ctl">
+    <button id="night" aria-pressed="false">Panel w nocy</button>
+    <button id="theme" aria-pressed="false">Telefon: jasny</button>
+  </div>
+</header>
+
+<div class="stage">
+  <figure>
+    <div class="bezel"><div class="screen" id="panel"></div></div>
+    <figcaption>Panel na ścianie (Guition 4848S040), skala 1:1 na ekranie komputera</figcaption>
+  </figure>
+  <figure>
+    <div class="phone"><div class="app" id="phone"></div></div>
+    <figcaption>Telefon: strona z płytki heatronic, wspólny szablon home-idf</figcaption>
+  </figure>
+</div>
+
+<div class="strip" id="strip"><h2>Wszystkie stany panelu</h2></div>
+
+<ul class="notes">
+  <li>Tarcza: łuk 270° od 15 do 25 °C. Wypełnienie do zadanej, kropka = bieżąca. Pomarańczowy = palnik grzeje dom, niebieski = ładuje ciepłą wodę, szary = czeka.</li>
+  <li>„−” i „+” są widoczne, ale wyszarzone, dopóki nie włączymy zmiany zadanej (później: krok 0,5 °C, także przeciąganiem po łuku).</li>
+  <li>Bieżąca = temperatura, według której grzeje kocioł: dziś czujnik FW100, po etapie 6 parter. Źródło w małym podpisie.</li>
+  <li>Brak danych: szare „--” zamiast starej liczby, z wiekiem ostatniego odczytu.</li>
+</ul>
+
+<script>
+const STATES = {
+  heat:  { label: 'Grzanie', set: 21.0, cur: 20.6, out: 8.4, flow: 41, burner: 45, mode: 'heat', prog: 'Dzień · noc od 22:00', progIcon: 'sun',
+           head: 'Grzanie · palnik 45 %', pill: ['heat', 'Grzeje'] },
+  dhw:   { label: 'Ciepła woda', set: 21.0, cur: 20.9, out: 8.1, flow: 72, burner: 100, mode: 'dhw', prog: 'Dzień · noc od 22:00', progIcon: 'sun',
+           head: 'Ładuje ciepłą wodę · 41 °C', pill: ['dhw', 'Ciepła woda'] },
+  idle:  { label: 'Czuwanie', set: 19.0, cur: 19.3, out: 4.2, flow: 27, burner: 0, mode: 'idle', prog: 'Noc · dzień od 06:00', progIcon: 'moon',
+           head: 'Czuwanie · ciepło w domu', pill: ['ok', 'Czuwa'] },
+  stale: { label: 'Brak danych', set: null, cur: null, out: null, flow: null, burner: null, mode: 'stale', prog: 'Ostatni odczyt 12 min temu', progIcon: '',
+           head: 'Brak danych z kotła', pill: ['warn', 'Brak danych'] },
+  fault: { label: 'Usterka', set: 21.0, cur: 19.8, out: 6.0, flow: 22, burner: 0, mode: 'fault', prog: 'Dzień · noc od 22:00', progIcon: 'sun',
+           head: 'Usterka kotła · kod 6A', pill: ['bad', 'Usterka'] },
+};
+const MIN = 15, MAX = 25, A0 = 135, SPAN = 270;
+const fmt = v => v == null ? '--' : v.toFixed(1).replace('.', ',');
+const ang = v => A0 + (Math.min(MAX, Math.max(MIN, v)) - MIN) / (MAX - MIN) * SPAN;
+const pt = (cx, cy, r, a) => [cx + r * Math.cos(a * Math.PI / 180), cy + r * Math.sin(a * Math.PI / 180)];
+function arc(cx, cy, r, a1, a2) {
+  const [x1, y1] = pt(cx, cy, r, a1), [x2, y2] = pt(cx, cy, r, a2);
+  return `M${x1.toFixed(1)} ${y1.toFixed(1)} A${r} ${r} 0 ${a2 - a1 > 180 ? 1 : 0} 1 ${x2.toFixed(1)} ${y2.toFixed(1)}`;
+}
+const ICON = {
+  flame: c => `<svg width="22" height="22" viewBox="0 0 24 24" fill="${c}"><path d="M12 2c1 4 6 6 6 12a6 6 0 0 1-12 0c0-3 1.5-5 3-6 0 2 1 3.5 2.5 4C11 9 10 5 12 2z"/></svg>`,
+  tap:   c => `<svg width="22" height="22" viewBox="0 0 24 24" fill="${c}"><path d="M12 3s-6 7-6 11a6 6 0 0 0 12 0c0-4-6-11-6-11z"/></svg>`,
+  pause: c => `<svg width="20" height="20" viewBox="0 0 24 24" fill="${c}"><rect x="6" y="5" width="4" height="14" rx="1.5"/><rect x="14" y="5" width="4" height="14" rx="1.5"/></svg>`,
+  warn:  c => `<svg width="22" height="22" viewBox="0 0 24 24" fill="${c}"><path d="M12 2 1 21h22L12 2zm-1 7h2v6h-2V9zm0 8h2v2h-2v-2z"/></svg>`,
+  sun:  '☀', moon: '☾',
+};
+const colorOf = m => ({ heat: 'var(--heat)', dhw: 'var(--dhw)', idle: '#5d7f90', stale: '#3b5868', fault: 'var(--bad)' })[m];
+
+/* One dial for both renderings; size = SVG width */
+function dial(s, size, opts = {}) {
+  const c = size / 2, r = size / 2 - 18, sw = opts.stroke || 16;
+  const track = opts.track || '#1e3440';
+  const fill = s.mode === 'heat' ? 'var(--heat)' : s.mode === 'dhw' ? 'var(--dhw)' : s.mode === 'fault' ? '#6b3a36' : '#4a6b7b';
+  let g = `<path d="${arc(c, c, r, A0, A0 + SPAN)}" stroke="${track}" stroke-width="${sw}" fill="none" stroke-linecap="round"/>`;
+  if (s.set != null) {
+    g += `<path d="${arc(c, c, r, A0, ang(s.set))}" stroke="${fill}" stroke-width="${sw}" fill="none" stroke-linecap="round"/>`;
+    const [hx, hy] = pt(c, c, r, ang(s.set));
+    g += `<circle cx="${hx}" cy="${hy}" r="${sw * .85}" fill="${opts.knob || '#0b161c'}" stroke="${fill}" stroke-width="4"/>`;
+  }
+  if (s.cur != null) {
+    const [tx, ty] = pt(c, c, r, ang(s.cur));
+    g += `<circle cx="${tx}" cy="${ty}" r="5" fill="${opts.text || '#e4eff3'}"/>`;
+  }
+  /* scale ticks at whole degrees */
+  for (let v = MIN; v <= MAX; v++) {
+    const [x1, y1] = pt(c, c, r - sw / 2 - 6, ang(v)), [x2, y2] = pt(c, c, r - sw / 2 - (v % 5 ? 10 : 16), ang(v));
+    g += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${opts.muted || '#3f5e6d'}" stroke-width="2" stroke-linecap="round"/>`;
+  }
+  const t = opts.text || '#e4eff3', mu = opts.muted || '#8aa9b6', k = size / 328;
+  g += `<text x="${c}" y="${c - 62 * k}" text-anchor="middle" fill="${mu}" font-size="${15 * k}" letter-spacing="2">ZADANA</text>`;
+  g += `<text x="${c}" y="${c + 22 * k}" text-anchor="middle" fill="${s.set == null ? mu : t}" font-size="${84 * k}" font-weight="600" letter-spacing="-3">${fmt(s.set)}<tspan font-size="${36 * k}" dy="${-36 * k}">°</tspan></text>`;
+  g += `<text x="${c}" y="${c + 62 * k}" text-anchor="middle" fill="${mu}" font-size="${19 * k}">teraz <tspan fill="${s.cur == null ? mu : t}" font-weight="600">${fmt(s.cur)}°</tspan></text>`;
+  g += `<text x="${c}" y="${c + 86 * k}" text-anchor="middle" fill="${mu}" font-size="${13 * k}" opacity=".8">FW100</text>`;
+  /* inactive − / + in the arc gap */
+  const by = c + r * .78;
+  for (const [dx, sym] of [[-46 * k, '−'], [46 * k, '+']]) {
+    g += `<circle cx="${c + dx}" cy="${by}" r="${22 * k}" fill="none" stroke="${opts.muted || '#3f5e6d'}" stroke-width="2" opacity=".55"/>`;
+    g += `<text x="${c + dx}" y="${by + 9 * k}" text-anchor="middle" fill="${mu}" opacity=".55" font-size="${28 * k}">${sym}</text>`;
+  }
+  return `<svg class="dial" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" font-family="ui-rounded, 'SF Pro Rounded', system-ui, sans-serif">${g}</svg>`;
+}
+
+function stateLine(s) {
+  const col = colorOf(s.mode);
+  if (s.mode === 'heat') return `${ICON.flame(col)}<span style="color:${col}">Grzanie</span><span style="color:#8aa9b6">· palnik ${s.burner} %</span>`;
+  if (s.mode === 'dhw') return `${ICON.tap(col)}<span style="color:${col}">Ciepła woda</span><span style="color:#8aa9b6">· 41 °C</span>`;
+  if (s.mode === 'idle') return `${ICON.pause('#8aa9b6')}<span>Czuwanie</span>`;
+  if (s.mode === 'stale') return `${ICON.warn('var(--warn)')}<span style="color:var(--warn)">Brak danych z kotła</span>`;
+  return `${ICON.warn(col)}<span style="color:${col}">Usterka kotła · 6A</span>`;
+}
+
+function panel(s) {
+  return `<div class="top"><span>pn 19.10</span><span class="clock">14:32</span><span class="out">zewn. <b>${fmt(s.out)}°</b></span></div>
+    ${dial(s, 328)}
+    <div class="lines"><div class="state">${stateLine(s)}</div>
+    <div class="prog">${s.progIcon ? ICON[s.progIcon] + ' ' : ''}${s.prog}</div></div>`;
+}
+
+function phone(s) {
+  const light = document.documentElement.dataset.theme === 'light';
+  const o = light ? { track: '#d6e2e7', knob: '#f4f7f8', text: '#13242d', muted: '#7d97a2', stroke: 14 } : { stroke: 14 };
+  const num = (v, unit, d = 1) => `<div><span class="num${v == null ? ' stale' : ''}">${v == null ? '--' : v.toFixed(d).replace('.', ',')}</span><span class="unit">${unit}</span></div>`;
+  const ev = s.mode === 'stale'
+    ? [['14:20', 'Ostatni odczyt z kotła'], ['14:05', 'Start palnika']]
+    : [['14:05', 'Start palnika · 45 %'], ['13:40', 'Koniec ładowania ciepłej wody'], ['06:00', 'Program: dzień, zadana 21,0°']];
+  return `<div class="top"><span class="mark"><span class="p">h</span>eatronic</span><span class="pill" data-kind="${s.pill[0]}"><span class="dot"></span>${s.pill[1]}</span></div>
+    <h1 class="head">${s.head}</h1>
+    <div class="stats">${num(s.cur, '°C w domu')}${num(s.out, '°C na zewnątrz')}${num(s.flow, '°C zasilanie', 0)}</div>
+    <div class="main-view">${dial(s, 300, o)}<div class="prog">${s.progIcon ? ICON[s.progIcon] + ' ' : ''}${s.prog}</div></div>
+    <h2 class="sec">Ostatnie</h2>
+    <ul class="events">${ev.map(([t, w]) => `<li><time>${t}</time><span>${w}</span></li>`).join('')}</ul>
+    <div class="tabs"><span class="on">Teraz</span><span>Historia</span><span>Ustawienia</span></div>`;
+}
+
+let cur = 'heat';
+function render() {
+  const s = STATES[cur];
+  document.getElementById('panel').innerHTML = panel(s);
+  document.getElementById('phone').innerHTML = phone(s);
+  document.querySelectorAll('#states button').forEach(b => b.setAttribute('aria-pressed', b.dataset.k === cur));
+}
+const bar = document.getElementById('states'), strip = document.getElementById('strip');
+for (const [k, s] of Object.entries(STATES)) {
+  const b = document.createElement('button'); b.textContent = s.label; b.dataset.k = k;
+  b.onclick = () => { cur = k; render(); }; bar.append(b);
+  const f = document.createElement('figure');
+  f.innerHTML = `<div class="scale"><div class="bezel"><div class="screen">${panel(s)}</div></div></div><figcaption>${s.label}</figcaption>`;
+  strip.append(f);
+}
+document.getElementById('night').onclick = e => {
+  const on = e.target.getAttribute('aria-pressed') !== 'true';
+  e.target.setAttribute('aria-pressed', on); document.getElementById('panel').classList.toggle('dim', on);
+};
+document.getElementById('theme').onclick = e => {
+  const on = e.target.getAttribute('aria-pressed') !== 'true';
+  e.target.setAttribute('aria-pressed', on); document.documentElement.dataset.theme = on ? 'light' : 'dark'; render();
+};
+render();
+</script>
+</body>
+</html>

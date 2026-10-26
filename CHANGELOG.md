@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.1.19 (2026-10-26)
+
+- `design/`: one look for app pages and wall panels, kept as data because CSS cannot reach an LVGL panel.
+  `tokens.json` holds the family's palette and sizes (equal to `web/app_shell.css`, checked in CI);
+  `views/thermostat/view.json` the thermostat view: colours by state, the dial geometry at a base size, states and
+  modes with English and Polish labels, icons, and the 480×480 panel layout and fonts. The accepted mockup moved in
+  as `views/thermostat/mockup/`.
+- `home_idf_design(<lib> VIEW <view> [LVGL_FONTS])` generates `hi_design_<view>.h` (`tools/design_tokens.py`) and
+  with `LVGL_FONTS` compiles the panel fonts into the component. `tools/design_tokens.py css` gives a page the
+  same colours.
+- Fonts: Nunito (OFL) for text with Polish letters and Material Symbols Rounded (Apache-2.0) for icons, from pinned
+  upstream commits (`tools/make_fonts.py`); woff2 subsets for pages and LVGL fonts for panels are committed, so a
+  firmware build needs neither Node nor fonttools. Host test `test/test_design.c` in CI.
+
 ## 0.1.18 (2026-10-26)
 
 - `hi_mqtt_subscribe_topic()`: receive another device's topic, e.g. the wall panel reading heatronic's retained

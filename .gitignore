@@ -13,3 +13,4 @@ sdkconfig.old
 credentials.h
 *.pem
 __pycache__/
+design-out/
