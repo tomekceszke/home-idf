@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.18 (2026-10-26)
+
+- `hi_mqtt_subscribe_topic()`: receive another device's topic, e.g. the wall panel reading heatronic's retained
+  `heatronic/<mac>/thermostat` and `status`. Same delivery as `hi_mqtt_subscribe()` (QoS 1, renewed on every
+  reconnect, reassembled up to a limit, callback in the MQTT task), but with the full topic; `+` and `#` are refused
+  because messages are matched by the exact topic. `HI_MQTT_MAX_SUBSCRIPTIONS` 2 → 4, shared by both calls.
+  `hi_mqtt_subscribe()` is unchanged.
+
 ## 0.1.17 (2026-10-15)
 
 - `hi_deadband`: decides when a value that is read often is worth sending: the first reading, a change of at least

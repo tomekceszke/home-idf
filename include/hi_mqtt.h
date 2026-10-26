@@ -72,11 +72,19 @@ int hi_mqtt_publish(const char *kind, const char *payload, int qos, bool retain)
 /*
  * Subscribes to <prefix>/<mac>/<kind> at QoS 1, now if connected and again after every reconnect (a retained
  * message, e.g. a config, therefore arrives on each connection). Messages longer than max_len are dropped.
- * Up to HI_MQTT_MAX_SUBSCRIPTIONS kinds; call from an application task (it may block briefly on the client lock),
- * before or after hi_mqtt_start().
+ * Up to HI_MQTT_MAX_SUBSCRIPTIONS subscriptions in all (with hi_mqtt_subscribe_topic()); call from an application
+ * task (it may block briefly on the client lock), before or after hi_mqtt_start().
  */
-#define HI_MQTT_MAX_SUBSCRIPTIONS 2
+#define HI_MQTT_MAX_SUBSCRIPTIONS 4
 esp_err_t hi_mqtt_subscribe(const char *kind, size_t max_len, hi_mqtt_message_fn_t cb);
+
+/*
+ * The same for a full topic outside this device's prefix, e.g. another device's retained state
+ * ("heatronic/0123456789ab/thermostat"). No wildcards: messages are matched by the exact topic, so + and # are
+ * refused (ESP_ERR_INVALID_ARG), as is a topic of 64 characters or more. The broker's ACL must allow the read;
+ * Mosquitto drops a denied subscription silently, so a callback that never runs points there first.
+ */
+esp_err_t hi_mqtt_subscribe_topic(const char *topic, size_t max_len, hi_mqtt_message_fn_t cb);
 
 /* Republishes the retained state now instead of waiting for the next period, e.g. after a valve moves.
  * Only signals the state task, so it is safe to call from anywhere, including an HTTP handler. */

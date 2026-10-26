@@ -106,6 +106,7 @@ void hi_mqtt_state_publish_now(void)
     if (s_state_task != NULL) xTaskNotifyGive(s_state_task);
 }
 
+/* A subscription by kind gets its topic here: <prefix>/<mac> is known only once hi_mqtt_start() has run. */
 static void subscribe_one(subscription_t *sub)
 {
     if (sub->topic[0] == '\0') {
@@ -114,18 +115,35 @@ static void subscribe_one(subscription_t *sub)
     if (esp_mqtt_client_subscribe(s_client, sub->topic, 1) < 0) ESP_LOGW(TAG, "Subscribe to %s failed", sub->topic);
 }
 
-esp_err_t hi_mqtt_subscribe(const char *kind, size_t max_len, hi_mqtt_message_fn_t cb)
+/* Exactly one of kind (own topic) and topic (full topic) is set. */
+static esp_err_t add_subscription(const char *kind, const char *topic, size_t max_len, hi_mqtt_message_fn_t cb)
 {
-    if (kind == NULL || cb == NULL || max_len == 0 || strlen(kind) >= sizeof(s_subs[0].kind)) return ESP_ERR_INVALID_ARG;
     if (s_sub_count >= HI_MQTT_MAX_SUBSCRIPTIONS) return ESP_ERR_NO_MEM;
     char *buf = malloc(max_len);
     if (buf == NULL) return ESP_ERR_NO_MEM;
     subscription_t *sub = &s_subs[s_sub_count];
     *sub = (subscription_t) {.max_len = max_len, .buf = buf, .cb = cb};
-    snprintf(sub->kind, sizeof(sub->kind), "%s", kind);
+    if (kind != NULL) snprintf(sub->kind, sizeof(sub->kind), "%s", kind);
+    if (topic != NULL) snprintf(sub->topic, sizeof(sub->topic), "%s", topic);
     s_sub_count++;
     if (s_client != NULL && s_connected) subscribe_one(sub);
     return ESP_OK;
+}
+
+esp_err_t hi_mqtt_subscribe(const char *kind, size_t max_len, hi_mqtt_message_fn_t cb)
+{
+    if (kind == NULL || cb == NULL || max_len == 0 || strlen(kind) >= sizeof(s_subs[0].kind)) return ESP_ERR_INVALID_ARG;
+    return add_subscription(kind, NULL, max_len, cb);
+}
+
+esp_err_t hi_mqtt_subscribe_topic(const char *topic, size_t max_len, hi_mqtt_message_fn_t cb)
+{
+    // Messages are matched to a subscription by the exact topic, so a wildcard would never deliver anything
+    if (topic == NULL || cb == NULL || max_len == 0 || topic[0] == '\0' || strlen(topic) >= sizeof(s_subs[0].topic) ||
+        strpbrk(topic, "+#") != NULL) {
+        return ESP_ERR_INVALID_ARG;
+    }
+    return add_subscription(NULL, topic, max_len, cb);
 }
 
 /* esp-mqtt delivers a long message in several DATA events; only the first carries the topic. */
