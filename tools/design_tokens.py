@@ -102,6 +102,9 @@ def header(view_name):
             elif isinstance(val, str) and (k == "color" or k.endswith("_color") or k == "bg"):
                 lines.append(f"#define {prefix}_{ident(k)} {hex_color(val, pal)}")
 
+    if "interaction" in view:
+        lines += ["", f"/* {view_name}: changing the set point */"]
+        numbers(f"HI_{v}_INTERACTION", view["interaction"])
     if "dial" in view:
         lines += ["", f"/* {view_name}: dial at the base size (scale by size / BASE) */"]
         numbers(f"HI_{v}_DIAL", view["dial"])
@@ -129,9 +132,11 @@ def header(view_name):
         lines.append("};")
     if "modes" in view:
         lines += ["", "typedef struct {", "    const char *key;", "    const char *icon;", "    const char *label;",
-                  f"}} hi_{view_name}_mode_t;", "", f"static const hi_{view_name}_mode_t HI_{v}_MODES[] = {{"]
+                  "    const char *short_label;", f"}} hi_{view_name}_mode_t;", "",
+                  f"static const hi_{view_name}_mode_t HI_{v}_MODES[] = {{"]
         for key, m in public(view["modes"]).items():
-            lines.append(f"    {{{c_string(key)}, {icon_utf8(view, m['icon'])}, {text(m['label'])}}},")
+            lines.append(f"    {{{c_string(key)}, {icon_utf8(view, m['icon'])}, {text(m['label'])}, "
+                         f"{text(m.get('short', m['label']))}}},")
         lines.append("};")
     for table in ("faults", "sources"):
         if table in view:

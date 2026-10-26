@@ -69,6 +69,11 @@ bool hi_mqtt_enabled(void);
  */
 int hi_mqtt_publish(const char *kind, const char *payload, int qos, bool retain);
 
+/* The same for a full topic outside this device's prefix, e.g. a request to another device
+ * ("heatronic/room/setpoint/set"); -1 for a topic with + or #. Same rule: call only from a task that may block. The
+ * broker's ACL must allow the write, and Mosquitto drops a denied publish silently. */
+int hi_mqtt_publish_topic(const char *topic, const char *payload, int qos, bool retain);
+
 /*
  * Subscribes to <prefix>/<mac>/<kind> at QoS 1, now if connected and again after every reconnect (a retained
  * message, e.g. a config, therefore arrives on each connection). Messages longer than max_len are dropped.

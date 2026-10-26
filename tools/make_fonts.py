@@ -112,7 +112,9 @@ def main():
                 # lv_font_conv writes its command line into the file: run it in tmp on relative names, so the
                 # output carries no local paths and is the same on every run
                 ranges, syms = glyphs(sets[font["glyphs"]])
-                cmd = LV_FONT_CONV + ["--font", nunito[font["weight"]].name]
+                cmd = list(LV_FONT_CONV)
+                if ranges or syms:          # an icons-only font has no text glyphs at all
+                    cmd += ["--font", nunito[font["weight"]].name]
                 for r in ranges:
                     cmd += ["-r", r]
                 if syms:

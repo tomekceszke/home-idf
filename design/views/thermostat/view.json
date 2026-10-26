@@ -27,11 +27,11 @@
     "radius": 146,
     "start_deg": 135,
     "span_deg": 270,
-    "track_width": 16,
-    "knob_r": 13,
+    "track_width": 20,
+    "knob_r": 15,
     "knob_stroke": 4,
-    "dot_r": 5,
-    "ticks": {"every_c": 1, "major_every_c": 5, "inner": 14, "minor_outer": 18, "major_outer": 24, "width": 2},
+    "dot_r": 6,
+    "ticks": {"every_c": 1, "major_every_c": 5, "inner": 16, "minor_outer": 20, "major_outer": 26, "width": 2},
     "text": {
       "label":     {"dy": -62, "size": 15, "weight": 400, "letter_spacing": 2, "color": "muted"},
       "set":       {"dy": 22, "size": 84, "weight": 600, "letter_spacing": -3, "color": "text"},
@@ -40,7 +40,7 @@
       "now_value": {"size": 19, "weight": 600, "color": "text"},
       "source":    {"dy": 86, "size": 13, "weight": 400, "color": "muted", "opacity": 0.8}
     },
-    "buttons": {"dx": 46, "dy_factor": 0.78, "r": 22, "glyph_size": 28}
+    "buttons": {"_doc": "Touch targets: on the 400 px panel dial 72 px across (~11 mm), ~16 px clear of the track ends (mockup v4).", "dx": 52, "dy_factor": 0.78, "r": 29.5, "glyph_size": 36, "stroke": 2.5}
   },
 
   "states": {
@@ -77,26 +77,33 @@
   },
 
   "modes": {
-    "day":     {"icon": "sun",       "label": {"en": "Day program", "pl": "Program dzienny"}},
-    "night":   {"icon": "moon",      "label": {"en": "Night program", "pl": "Program nocny"}},
-    "frost":   {"icon": "snowflake", "label": {"en": "Frost protection", "pl": "Ochrona przed mrozem"}},
-    "pause":   {"icon": "snowflake", "label": {"en": "Paused until the next program switch", "pl": "Pauza do następnego przełączenia programu"}},
-    "unknown": {"icon": null,        "label": {"en": "Program unknown", "pl": "Program nieznany"}}
+    "_doc": "icon = on the program button (the level in force; the schedule icon while paused), short = the panel's line next to it.",
+    "day":     {"icon": "sun",       "label": {"en": "Day program", "pl": "Program dzienny"},
+                "short": {"en": "Day program", "pl": "Program dzienny"}},
+    "night":   {"icon": "moon",      "label": {"en": "Night program", "pl": "Program nocny"},
+                "short": {"en": "Night program", "pl": "Program nocny"}},
+    "frost":   {"icon": "snowflake", "label": {"en": "Frost protection", "pl": "Ochrona przed mrozem"},
+                "short": {"en": "Frost protection", "pl": "Ochrona przed mrozem"}},
+    "pause":   {"icon": "program",   "label": {"en": "Paused until the next program switch", "pl": "Pauza do następnego przełączenia programu"},
+                "short": {"en": "Paused until the switch", "pl": "Pauza do przełączenia"}},
+    "unknown": {"icon": "program",   "label": {"en": "Program unknown", "pl": "Program nieznany"},
+                "short": {"en": "Program unknown", "pl": "Program nieznany"}}
   },
 
   "sources": {
-    "fw100": {"en": "FW100", "pl": "FW100"},
-    "w100":  {"en": "W100 · living room", "pl": "W100 · salon"}
+    "_doc": "Where the controlling room temperature is measured, by location only (owner, 2026-10-27).",
+    "fw100": {"en": "attic", "pl": "poddasze"},
+    "w100":  {"en": "living room", "pl": "salon"}
   },
 
   "texts": {
     "set_point":    {"en": "SET POINT", "pl": "ZADANA"},
     "now":          {"en": "now", "pl": "teraz"},
     "override":     {"en": " · set here or on the W100", "pl": " · ustawione tutaj lub na W100"},
+    "override_short": {"en": "Manual until the switch", "pl": "Ręcznie do przełączenia"},
     "outdoor":      {"en": "out", "pl": "zewn."},
     "last_reading": {"en": "Last reading {0} ago", "pl": "Ostatni odczyt {0} temu"},
-    "waiting":      {"en": "Waiting for data", "pl": "Czekam na dane"},
-    "days":         {"en": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"], "pl": ["nd", "pn", "wt", "śr", "cz", "pt", "sb"]}
+    "waiting":      {"en": "Waiting for data", "pl": "Czekam na dane"}
   },
 
   "icons": {
@@ -108,40 +115,54 @@
     "offline":   "e2c1",
     "sun":       "e518",
     "moon":      "f159",
-    "snowflake": "eb3b"
+    "snowflake": "eb3b",
+    "heat_off":  "f16d",
+    "weather":   "f172",
+    "program":   "efd6"
+  },
+
+  "interaction": {
+    "_doc": "Changing the set point (owner, 2026-10-27): − / + in step_c, or turning the ring by its knob or track (a press on the track or within drag_band px of it at the base size, inside and outside; the middle does nothing; owner 2026-10-27: 25 was far wider than the track). The value shown in the accent colour until a document confirms it, or back to the one in force after confirm_timeout_ms (longer than heatronic's 30 s sample period: a panel on MQTT may see the change only with the next document). The program button returns to the program from a pause and from a manual set point (\"auto\" ends both). − / + send send_after_ms after the last press, the ring on release. Requests go to heatronic/room/setpoint/set only while the document says accepts_requests.",
+    "step_c": 0.5,
+    "drag_band": 7,
+    "send_after_ms": 1200,
+    "confirm_timeout_ms": 35000,
+    "drag_knob_r": 18,
+    "drag_halo_r": 28
   },
 
   "panel": {
-    "_doc": "Wall panel 480x480 (mockup/index.html): dial at 328 px, top-left corner (76, 58). Text sizes in px. Top bar: day and date, clock, outdoor temperature.",
+    "_doc": "Wall panel 480x480 (mockup v4, owner 2026-10-27). The dial is the base geometry scaled to dial_size (400 / 328), centred, 18 px from the top (owner: not glued to the top edge); dial_text gives its text sizes at that scale. Top bar: clock left, weather icon + outdoor temperature right, both at the clock's size. In the dial the boiler as an icon (flame, drop, warning) midway between the top tick and the label. Bottom: three round buttons (program, pause, hot water) with the mode's short text after the first; a fault or missing data replaces them with one alert line. Sizes in px.",
     "width": 480,
     "height": 480,
     "bg": "#0b161c",
-    "dial_size": 328,
-    "dial_x": 76,
-    "dial_y": 58,
-    "top":   {"y": 16, "x": 24, "size": 20, "weight": 400, "color": "muted", "value_weight": 600,
-              "clock_size": 26, "clock_weight": 600},
-    "state": {"bottom": 22, "size": 22, "weight": 600, "icon_size": 22, "gap": 9},
-    "prog":  {"size": 17, "weight": 400, "color": "muted", "gap": 6},
+    "dial_size": 400,
+    "dial_x": 40,
+    "dial_y": 18,
+    "dial_text": {"label": 18, "set": 102, "set_unit": 44, "now": 23, "source": 16, "signs": 44, "boiler_icon": 30},
+    "top":   {"y": 16, "x": 24, "clock_size": 26, "clock_weight": 600, "icon_dy": 4, "icon_gap": 6, "color": "muted"},
+    "modes": {"cy": 436, "r": 30, "stroke": 2, "stroke_on": 3, "program_x": 54, "pause_x": 358, "dhw_x": 428,
+              "text_x": 96, "text_size": 20, "icon_size": 30, "disabled_opa": 0.5},
+    "alert": {"cy": 436, "size": 22},
     "fonts": [
-      {"name": "nunito_13", "weight": 400, "size": 13, "glyphs": "text"},
-      {"name": "nunito_15", "weight": 400, "size": 15, "glyphs": "text"},
-      {"name": "nunito_17", "weight": 400, "size": 17, "glyphs": "text", "icons": true},
-      {"name": "nunito_19", "weight": 400, "size": 19, "glyphs": "text"},
-      {"name": "nunito_20", "weight": 400, "size": 20, "glyphs": "text"},
-      {"name": "nunito_28", "weight": 400, "size": 28, "glyphs": "signs"},
-      {"name": "nunito_semibold_19", "weight": 600, "size": 19, "glyphs": "digits"},
-      {"name": "nunito_semibold_20", "weight": 600, "size": 20, "glyphs": "digits"},
+      {"name": "nunito_16", "weight": 400, "size": 16, "glyphs": "text"},
+      {"name": "nunito_18", "weight": 400, "size": 18, "glyphs": "text"},
+      {"name": "nunito_23", "weight": 400, "size": 23, "glyphs": "text"},
+      {"name": "nunito_44", "weight": 400, "size": 44, "glyphs": "signs"},
+      {"name": "nunito_semibold_20", "weight": 600, "size": 20, "glyphs": "text"},
       {"name": "nunito_semibold_22", "weight": 600, "size": 22, "glyphs": "text", "icons": true},
-      {"name": "nunito_semibold_26", "weight": 600, "size": 26, "glyphs": "digits"},
-      {"name": "nunito_semibold_36", "weight": 600, "size": 36, "glyphs": "digits"},
-      {"name": "nunito_semibold_84", "weight": 600, "size": 84, "glyphs": "digits"}
+      {"name": "nunito_semibold_23", "weight": 600, "size": 23, "glyphs": "digits"},
+      {"name": "nunito_semibold_26", "weight": 600, "size": 26, "glyphs": "digits", "icons": true},
+      {"name": "nunito_semibold_44", "weight": 600, "size": 44, "glyphs": "digits"},
+      {"name": "nunito_semibold_102", "weight": 600, "size": 102, "glyphs": "digits"},
+      {"name": "icons_30", "weight": 400, "size": 30, "glyphs": "none", "icons": true}
     ],
     "glyph_sets": {
-      "_doc": "text = printable ASCII, Polish letters and the signs below; digits = what numbers and the clock need.",
+      "_doc": "text = printable ASCII, Polish letters and the signs below; digits = what numbers and the clock need; none = icons only.",
       "text": "ASCII ąćęłńóśźżĄĆĘŁŃÓŚŹŻ°·–−",
       "digits": "0123456789.,:–−°% ",
-      "signs": "+−"
+      "signs": "+−",
+      "none": ""
     }
   }
 }

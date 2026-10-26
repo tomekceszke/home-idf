@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.1.20 (2026-10-27)
+
+- `hi_mqtt_publish_topic()`: publish to a full topic outside the device's prefix (`+` and `#` refused), e.g. the
+  wall panel's requests on `heatronic/room/setpoint/set`. Same rule as `hi_mqtt_publish()`: only from a task that may
+  block.
+- Thermostat view after the owner's review on the wall panel (mockup v4 in `views/thermostat/mockup`): a thicker
+  dial (track 16 → 20 at the base size, knob, dot and ticks with it) and bigger − / + touch targets (72 px across on
+  the 400 px panel dial, clear of the track ends). `interaction`: changing the set point by − / + or by turning the
+  ring, the pending value in the accent colour until confirmed, requests only while `accepts_requests`.
+  `sources` name the room by location only ("salon", "poddasze"); modes carry a short text and the icon of the
+  program button (the schedule icon while paused); icons for the weather, heating off and the program.
+- Panel layout: the dial at 400 px (was 328), centred near the top, texts scaled with it; top bar = clock left,
+  weather icon and outdoor temperature right at the clock's size; the boiler as an icon in the dial; at the bottom
+  three round buttons (program, pause, hot water) with the mode's text, or one alert line for a fault or missing data.
+  Panel fonts regenerated, including an icons-only one (`make_fonts.py` takes a glyph set "none").
+
 ## 0.1.19 (2026-10-26)
 
 - `design/`: one look for app pages and wall panels, kept as data because CSS cannot reach an LVGL panel.

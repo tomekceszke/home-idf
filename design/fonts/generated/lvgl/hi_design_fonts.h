@@ -4,15 +4,14 @@
 
 #include "lvgl.h"
 
-LV_FONT_DECLARE(hi_font_nunito_13)
-LV_FONT_DECLARE(hi_font_nunito_15)
-LV_FONT_DECLARE(hi_font_nunito_17)
-LV_FONT_DECLARE(hi_font_nunito_19)
-LV_FONT_DECLARE(hi_font_nunito_20)
-LV_FONT_DECLARE(hi_font_nunito_28)
-LV_FONT_DECLARE(hi_font_nunito_semibold_19)
+LV_FONT_DECLARE(hi_font_nunito_16)
+LV_FONT_DECLARE(hi_font_nunito_18)
+LV_FONT_DECLARE(hi_font_nunito_23)
+LV_FONT_DECLARE(hi_font_nunito_44)
 LV_FONT_DECLARE(hi_font_nunito_semibold_20)
 LV_FONT_DECLARE(hi_font_nunito_semibold_22)
+LV_FONT_DECLARE(hi_font_nunito_semibold_23)
 LV_FONT_DECLARE(hi_font_nunito_semibold_26)
-LV_FONT_DECLARE(hi_font_nunito_semibold_36)
-LV_FONT_DECLARE(hi_font_nunito_semibold_84)
+LV_FONT_DECLARE(hi_font_nunito_semibold_44)
+LV_FONT_DECLARE(hi_font_nunito_semibold_102)
+LV_FONT_DECLARE(hi_font_icons_30)

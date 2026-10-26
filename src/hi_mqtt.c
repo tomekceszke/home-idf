@@ -75,6 +75,12 @@ int hi_mqtt_publish(const char *kind, const char *payload, int qos, bool retain)
     return publish_topic(topic, payload, qos, retain);
 }
 
+int hi_mqtt_publish_topic(const char *topic, const char *payload, int qos, bool retain)
+{
+    if (topic == NULL || topic[0] == '\0' || strpbrk(topic, "+#") != NULL) return -1;
+    return publish_topic(topic, payload, qos, retain);
+}
+
 /* Skipped while disconnected on purpose: a retained state queued offline would sit in the outbox and
  * push out the readings that actually need to survive the outage. The LWT already says we are gone. */
 static void publish_state(void)

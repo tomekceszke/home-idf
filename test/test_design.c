@@ -42,10 +42,8 @@ int main(void)
     CHECK(COUNT(HI_THERMOSTAT_MODES) == 5);
     CHECK(strcmp(HI_THERMOSTAT_SOURCES[1][0], "w100") == 0);
 
-    // The panel's state line: label colour and the muted detail; days start on Sunday (struct tm tm_wday)
     CHECK(state("idle")->label_color == HI_COLOR_TEXT && state("idle")->detail[0] == '\0');
     CHECK(strcmp(state("heat_flame")->detail, "\xc2\xb7 palnik {0} %") == 0);
-    CHECK(COUNT(HI_THERMOSTAT_TEXT_DAYS) == 7 && strcmp(HI_THERMOSTAT_TEXT_DAYS[1], "pn") == 0);
 
     if (!fail) printf("design: all checks passed\n");
     return fail;
