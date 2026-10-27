@@ -103,7 +103,7 @@ def header(view_name):
                 lines.append(f"#define {prefix}_{ident(k)} {hex_color(val, pal)}")
 
     if "arc" in view:
-        lines += ["", f"/* {view_name}: the dial's fill by what is in force (first match: fault, dhw, manual, the mode) */"]
+        lines += ["", f"/* {view_name}: the dial's fill by what is in force (first match: fault, manual, the mode) */"]
         lines += [f"#define HI_{v}_ARC_{ident(k)} {hex_color(c, pal)}" for k, c in public(view["arc"]).items()]
     if "interaction" in view:
         lines += ["", f"/* {view_name}: changing the set point */"]

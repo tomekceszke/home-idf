@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.22 (2026-10-27)
+
+- Thermostat view: hot water being charged no longer colours the dial (`arc` loses `dhw`). It changes nothing in the
+  heating, so the fill keeps the program or the manual set point; the boiler's drop icon and the lit hot water button
+  show the charge.
+
 ## 0.1.21 (2026-10-27)
 
 - Thermostat view, after the owner tried the panel's controls: the dial's fill and knob show what is in force, not the

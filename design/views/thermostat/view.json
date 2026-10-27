@@ -22,9 +22,8 @@
   },
 
   "arc": {
-    "_doc": "Colour of the dial's fill and knob (owner, 2026-10-27): the program in force, not the burner, which has its own icon. First match wins: a fault, hot water being charged, a manual set point, then the mode. A set point not yet confirmed pulses instead of changing colour.",
+    "_doc": "Colour of the dial's fill and knob (owner, 2026-10-27): the program in force, not the burner, which has its own icon. First match wins: a fault, a manual set point, then the mode. Hot water being charged leaves it alone (owner, 2026-10-27: it changes nothing in the heating; the boiler's drop icon and the lit hot water button show it). A set point not yet confirmed pulses instead of changing colour.",
     "fault": "bad",
-    "dhw": "dhw",
     "manual": "manual",
     "day": "heat",
     "night": "idle",
