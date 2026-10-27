@@ -24,10 +24,10 @@ int main(void)
     for (size_t i = 0; i < COUNT(keys); i++) CHECK(state(keys[i]) != NULL);
     CHECK(COUNT(HI_THERMOSTAT_STATES) == COUNT(keys));
 
-    // Colours resolve through the tokens: the heating arc is the view's heat colour, faults draw the dim arc
-    CHECK(state("heat_flame")->arc == HI_COLOR_HEAT);
-    CHECK(state("fault")->arc == HI_COLOR_FAULT_ARC);
-    CHECK(state("fault")->icon_color == HI_COLOR_BAD);
+    // Colours resolve through the tokens: the arc follows the program (day = the heat colour), the burner its icon
+    CHECK(HI_THERMOSTAT_ARC_DAY == HI_COLOR_HEAT && HI_THERMOSTAT_ARC_NIGHT == HI_COLOR_IDLE);
+    CHECK(HI_THERMOSTAT_ARC_FAULT == HI_COLOR_BAD && HI_THERMOSTAT_ARC_MANUAL == HI_COLOR_MANUAL);
+    CHECK(state("fault")->icon_color == HI_COLOR_BAD && state("heat_flame")->icon_color == HI_COLOR_HEAT);
 
     // Polish text survives as UTF-8 ("ł" = c5 82) and icons are 3-byte private-use characters
     CHECK(strcmp(state("dhw")->label, "Ciep\xc5\x82" "a woda") == 0);

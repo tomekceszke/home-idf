@@ -14,11 +14,23 @@
     "heat": "#f08a3c",
     "dhw": "#56c2e6",
     "idle": "#4a6b7b",
-    "fault-arc": "#6b3a36",
+    "manual": "#a48cf0",
     "track": "#1e3440",
     "tick": "#3f5e6d",
     "accent": "#f08a3c",
     "on-accent": "#1b1210"
+  },
+
+  "arc": {
+    "_doc": "Colour of the dial's fill and knob (owner, 2026-10-27): the program in force, not the burner, which has its own icon. First match wins: a fault, hot water being charged, a manual set point, then the mode. A set point not yet confirmed pulses instead of changing colour.",
+    "fault": "bad",
+    "dhw": "dhw",
+    "manual": "manual",
+    "day": "heat",
+    "night": "idle",
+    "frost": "idle",
+    "pause": "idle",
+    "unknown": "idle"
   },
 
   "dial": {
@@ -44,28 +56,28 @@
   },
 
   "states": {
-    "_doc": "By the document's state (and flame for heat). arc = colour of the fill and the knob, pill = the shell's pill kind on the page, icon = an entry of icons. The panel's state line is icon + short (in label_color) + detail (muted); {0} = burner %, DHW temperature (whole degrees), fault code or fault text.",
-    "heat_flame": {"arc": "heat", "pill": "flow", "icon": "flame", "icon_color": "heat", "label_color": "heat",
+    "_doc": "By the document's state (and flame for heat). pill = the shell's pill kind on the page, icon = an entry of icons. The panel's state line is icon + short (in label_color) + detail (muted); {0} = burner %, DHW temperature (whole degrees), fault code or fault text.",
+    "heat_flame": {"pill": "flow", "icon": "flame", "icon_color": "heat", "label_color": "heat",
                    "headline": {"en": "Heating · burner {0} %", "pl": "Grzanie · palnik {0} %"},
                    "short": {"en": "Heating", "pl": "Ogrzewanie"},
                    "detail": {"en": "· burner {0} %", "pl": "· palnik {0} %"}},
-    "heat":       {"arc": "heat", "pill": "heat", "icon": "flame", "icon_color": "muted", "label_color": "heat",
+    "heat":       {"pill": "heat", "icon": "flame", "icon_color": "muted", "label_color": "heat",
                    "headline": {"en": "Heating · burner paused", "pl": "Grzanie · przerwa palnika"},
                    "short": {"en": "Heating", "pl": "Ogrzewanie"},
                    "detail": {"en": "· burner paused", "pl": "· przerwa palnika"}},
-    "dhw":        {"arc": "dhw", "pill": "dhw", "icon": "drop", "icon_color": "dhw", "label_color": "dhw",
+    "dhw":        {"pill": "dhw", "icon": "drop", "icon_color": "dhw", "label_color": "dhw",
                    "headline": {"en": "Charging hot water{0}", "pl": "Grzanie ciepłej wody{0}"},
                    "short": {"en": "Hot water", "pl": "Ciepła woda"},
                    "detail": {"en": "· {0} °C", "pl": "· {0} °C"}},
-    "idle":       {"arc": "idle", "pill": "ok", "icon": "pause", "icon_color": "muted", "label_color": "text",
+    "idle":       {"pill": "ok", "icon": "pause", "icon_color": "muted", "label_color": "text",
                    "headline": {"en": "Idle", "pl": "Spoczynek"},
                    "short": {"en": "Idle", "pl": "Spoczynek"},
                    "detail": {"en": "", "pl": ""}},
-    "fault":      {"arc": "fault-arc", "pill": "bad", "icon": "warning", "icon_color": "bad", "label_color": "bad",
+    "fault":      {"pill": "bad", "icon": "warning", "icon_color": "bad", "label_color": "bad",
                    "headline": {"en": "Boiler fault {0}", "pl": "Usterka kotła {0}"},
                    "short": {"en": "Fault", "pl": "Usterka"},
                    "detail": {"en": "· {0}", "pl": "· {0}"}},
-    "unknown":    {"arc": "idle", "pill": "warn", "icon": "offline", "icon_color": "warn", "label_color": "warn",
+    "unknown":    {"pill": "warn", "icon": "offline", "icon_color": "warn", "label_color": "warn",
                    "headline": {"en": "No data from the boiler", "pl": "Brak danych z kotła"},
                    "short": {"en": "No data", "pl": "Brak danych"},
                    "detail": {"en": "from the boiler", "pl": "z kotła"}}
@@ -122,13 +134,15 @@
   },
 
   "interaction": {
-    "_doc": "Changing the set point (owner, 2026-10-27): − / + in step_c, or turning the ring by its knob or track (a press on the track or within drag_band px of it at the base size, inside and outside; the middle does nothing; owner 2026-10-27: 25 was far wider than the track). The value shown in the accent colour until a document confirms it, or back to the one in force after confirm_timeout_ms (longer than heatronic's 30 s sample period: a panel on MQTT may see the change only with the next document). The program button returns to the program from a pause and from a manual set point (\"auto\" ends both). − / + send send_after_ms after the last press, the ring on release. Requests go to heatronic/room/setpoint/set only while the document says accepts_requests.",
+    "_doc": "Changing the set point (owner, 2026-10-27): − / + in step_c, or turning the ring by its knob or track (a press on the track or within drag_band px of it at the base size, inside and outside; the middle does nothing; owner 2026-10-27: 25 was far wider than the track). The value shown in the accent colour until a document confirms it, or back to the one in force after confirm_timeout_ms (heatronic ≥ 0.16.0 publishes the view at once on a change of its set point, mode or override: ~1 s). The pending value pulses (pulse_ms per cycle, between pulse_min_opa and full). The program button returns to the program from a pause and from a manual set point (\"auto\" ends both). − / + send send_after_ms after the last press, the ring on release. Requests go to heatronic/room/setpoint/set only while the document says accepts_requests.",
     "step_c": 0.5,
     "drag_band": 7,
     "send_after_ms": 1200,
-    "confirm_timeout_ms": 35000,
+    "confirm_timeout_ms": 8000,
     "drag_knob_r": 18,
-    "drag_halo_r": 28
+    "drag_halo_r": 28,
+    "pulse_ms": 900,
+    "pulse_min_opa": 0.35
   },
 
   "panel": {

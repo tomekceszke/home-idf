@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.21 (2026-10-27)
+
+- Thermostat view, after the owner tried the panel's controls: the dial's fill and knob show what is in force, not the
+  burner (the burner has its icon): day orange, night, frost and pause grey, a manual set point violet (`manual`, new
+  colour), hot water being charged blue, a fault red (`arc`, first match wins). A set point waiting for confirmation
+  pulses (`pulse_ms`, `pulse_min_opa`) instead of turning orange; the knob held by a finger is white. The states lose
+  their `arc` colour and the unused `fault-arc`. `confirm_timeout_ms` back to 8 s: heatronic 0.16.0 publishes its view
+  at once on a change of its set point, mode or override.
+
 ## 0.1.20 (2026-10-27)
 
 - `hi_mqtt_publish_topic()`: publish to a full topic outside the device's prefix (`+` and `#` refused), e.g. the

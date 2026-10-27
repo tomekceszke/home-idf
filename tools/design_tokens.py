@@ -102,6 +102,9 @@ def header(view_name):
             elif isinstance(val, str) and (k == "color" or k.endswith("_color") or k == "bg"):
                 lines.append(f"#define {prefix}_{ident(k)} {hex_color(val, pal)}")
 
+    if "arc" in view:
+        lines += ["", f"/* {view_name}: the dial's fill by what is in force (first match: fault, dhw, manual, the mode) */"]
+        lines += [f"#define HI_{v}_ARC_{ident(k)} {hex_color(c, pal)}" for k, c in public(view["arc"]).items()]
     if "interaction" in view:
         lines += ["", f"/* {view_name}: changing the set point */"]
         numbers(f"HI_{v}_INTERACTION", view["interaction"])
@@ -119,14 +122,14 @@ def header(view_name):
         return c_string(d["pl"])
 
     if "states" in view:
-        lines += ["", "typedef struct {", "    const char *key;", "    uint32_t arc;", "    const char *icon;",
+        lines += ["", "typedef struct {", "    const char *key;", "    const char *icon;",
                   "    uint32_t icon_color;", "    uint32_t label_color;",
                   "    const char *headline;   /* {0} = burner %, DHW temperature, fault code */",
                   "    const char *label;", "    const char *detail;     /* panel: muted, after the label; {0} as above */",
                   f"}} hi_{view_name}_state_t;", "",
                   f"static const hi_{view_name}_state_t HI_{v}_STATES[] = {{"]
         for key, s in public(view["states"]).items():
-            lines.append(f"    {{{c_string(key)}, {hex_color(s['arc'], pal)}, {icon_utf8(view, s['icon'])}, "
+            lines.append(f"    {{{c_string(key)}, {icon_utf8(view, s['icon'])}, "
                          f"{hex_color(s['icon_color'], pal)}, {hex_color(s['label_color'], pal)}, "
                          f"{text(s['headline'])}, {text(s['short'])}, {text(s['detail'])}}},")
         lines.append("};")
