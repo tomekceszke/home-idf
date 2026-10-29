@@ -2,8 +2,8 @@
   "_doc": "Weather view: the wall panel's screen saver, drawn from the retained weather/forecast document (wall-panel docs/DATA.md, Forecast: Open-Meteo through wp-weather on hc-data) and the outdoor temperature of heatronic/<mac>/thermostat. Mockup v1 (owner, 2026-10-29: variant A, the weather icon right of the temperature so the layout is the same for negative values). A touch anywhere opens the thermostat view; the panel comes back here after a minute without a touch.",
 
   "format": {
-    "_doc": "The big temperature: one decimal with a point, as the thermostat; slots in whole degrees. The heatronic reading counts as current while its document is (thermostat format.stale_after_s); without it the forecast's current temperature is shown with by_forecast. A forecast older than stale_after_s is not shown at all.",
-    "decimals": 1,
+    "_doc": "Whole degrees everywhere, the big temperature too (owner, 2026-10-29: no decimals needed on the saver). The heatronic reading counts as current while its document is (thermostat format.stale_after_s); without it the forecast's current temperature is shown with by_forecast. A forecast older than stale_after_s is not shown at all.",
+    "decimals": 0,
     "missing": "–",
     "stale_after_s": 10800
   },
@@ -58,7 +58,7 @@
   },
 
   "panel": {
-    "_doc": "Wall panel 480x480 (mockup v1). y are text baselines. Top: clock left, day and date right. Middle: the temperature with a raised degree sign and the weather icon after it, centred together on center_x; wider than max_width (−12.3 with the icon) it is drawn at size_small. Under it one line: the boiler's fault (the thermostat's alert line), else the weather in words (+ by_forecast). A separator, then the slots: the hour floor(now) + first_h, then every every_h, each hour, icon, temperature and the chance of rain from pop_min %. No forecast: one line instead of the slots.",
+    "_doc": "Wall panel 480x480 (mockup v1). y are text baselines. Top: clock left, day and date right. Middle: the temperature with a raised degree sign and the weather icon after it, centred together on center_x; wider than max_width it is drawn at size_small (a safety net: whole degrees fit). Under it one line: the boiler's fault (the thermostat's alert line), else the weather in words (+ by_forecast). A separator, then the slots: the hour floor(now) + first_h, then every every_h, each hour, icon, temperature and the chance of rain from pop_min %. No forecast: one line instead of the slots.",
     "width": 480,
     "height": 480,
     "bg": "#0b161c",
