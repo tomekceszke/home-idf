@@ -1,0 +1,98 @@
+{
+  "_doc": "Weather view: the wall panel's screen saver, drawn from the retained weather/forecast document (wall-panel docs/DATA.md, Forecast: Open-Meteo through wp-weather on hc-data) and the outdoor temperature of heatronic/<mac>/thermostat. Mockup v1 (owner, 2026-10-29: variant A, the weather icon right of the temperature so the layout is the same for negative values). A touch anywhere opens the thermostat view; the panel comes back here after a minute without a touch.",
+
+  "format": {
+    "_doc": "The big temperature: one decimal with a point, as the thermostat; slots in whole degrees. The heatronic reading counts as current while its document is (thermostat format.stale_after_s); without it the forecast's current temperature is shown with by_forecast. A forecast older than stale_after_s is not shown at all.",
+    "decimals": 1,
+    "missing": "–",
+    "stale_after_s": 10800
+  },
+
+  "colors": {
+    "sun": "#f5c451",
+    "rain": "#56c2e6",
+    "sep": "#1e3440"
+  },
+
+  "conditions": {
+    "_doc": "WMO weather_code as Open-Meteo gives it -> icon by day and by night (is_day), its colour, the words under the big temperature. A code not listed is shown as overcast.",
+    "clear":     {"codes": [0],                      "day": "sunny",             "night": "clear_night",         "color": "sun",   "label": {"en": "Clear", "pl": "Bezchmurnie"}},
+    "mainly":    {"codes": [1],                      "day": "partly_cloudy_day", "night": "partly_cloudy_night", "color": "text",  "label": {"en": "Mainly clear", "pl": "Przeważnie pogodnie"}},
+    "partly":    {"codes": [2],                      "day": "partly_cloudy_day", "night": "partly_cloudy_night", "color": "text",  "label": {"en": "Partly cloudy", "pl": "Częściowe zachmurzenie"}},
+    "overcast":  {"codes": [3],                      "day": "cloud",             "night": "cloud",               "color": "muted", "label": {"en": "Overcast", "pl": "Pochmurno"}},
+    "fog":       {"codes": [45, 48],                 "day": "foggy",             "night": "foggy",               "color": "muted", "label": {"en": "Fog", "pl": "Mgła"}},
+    "drizzle":   {"codes": [51, 53, 55],             "day": "rainy_light",       "night": "rainy_light",         "color": "rain",  "label": {"en": "Drizzle", "pl": "Mżawka"}},
+    "freezing":  {"codes": [56, 57, 66, 67],         "day": "weather_mix",       "night": "weather_mix",         "color": "rain",  "label": {"en": "Freezing rain", "pl": "Marznący deszcz"}},
+    "rain":      {"codes": [61, 63, 80, 81],         "day": "rainy",             "night": "rainy",               "color": "rain",  "label": {"en": "Rain", "pl": "Deszcz"}},
+    "heavy":     {"codes": [65, 82],                 "day": "rainy_heavy",       "night": "rainy_heavy",         "color": "rain",  "label": {"en": "Heavy rain", "pl": "Ulewa"}},
+    "snow":      {"codes": [71, 73, 75, 77, 85, 86], "day": "weather_snowy",     "night": "weather_snowy",       "color": "text",  "label": {"en": "Snow", "pl": "Śnieg"}},
+    "storm":     {"codes": [95, 96, 99],             "day": "thunderstorm",      "night": "thunderstorm",        "color": "warn",  "label": {"en": "Thunderstorm", "pl": "Burza"}}
+  },
+
+  "texts": {
+    "no_forecast":  {"en": "No forecast", "pl": "Brak prognozy"},
+    "forecast_age": {"en": "No forecast · last {0} ago", "pl": "Brak prognozy · ostatnia {0} temu"},
+    "by_forecast":  {"en": "by the forecast", "pl": "wg prognozy"},
+    "days":   {"en": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+               "pl": ["niedziela", "poniedziałek", "wtorek", "środa", "czwartek", "piątek", "sobota"]},
+    "months": {"en": ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+               "pl": ["stycznia", "lutego", "marca", "kwietnia", "maja", "czerwca", "lipca", "sierpnia", "września", "października", "listopada", "grudnia"]}
+  },
+
+  "icons": {
+    "_doc": "Material Symbols Rounded, filled (FILL 1, wght 400, GRAD 0, opsz 24): name -> codepoint.",
+    "sunny":               "e81a",
+    "clear_night":         "f159",
+    "partly_cloudy_day":   "f172",
+    "partly_cloudy_night": "f174",
+    "cloud":               "f15c",
+    "foggy":               "e818",
+    "rainy_light":         "f61e",
+    "weather_mix":         "f60b",
+    "rainy":               "f176",
+    "rainy_heavy":         "f61f",
+    "weather_snowy":       "e2cd",
+    "thunderstorm":        "ebdb",
+    "cloud_off":           "e2c1",
+    "warning":             "f083"
+  },
+
+  "panel": {
+    "_doc": "Wall panel 480x480 (mockup v1). y are text baselines. Top: clock left, day and date right. Middle: the temperature with a raised degree sign and the weather icon after it, centred together on center_x; wider than max_width (−12.3 with the icon) it is drawn at size_small. Under it one line: the boiler's fault (the thermostat's alert line), else the weather in words (+ by_forecast). A separator, then the slots: the hour floor(now) + first_h, then every every_h, each hour, icon, temperature and the chance of rain from pop_min %. No forecast: one line instead of the slots.",
+    "width": 480,
+    "height": 480,
+    "bg": "#0b161c",
+    "clock":   {"x": 24, "y": 66, "size": 52},
+    "date":    {"x": 456, "day_y": 40, "date_y": 66, "size": 20},
+    "big":     {"center_x": 240, "y": 238, "size": 140, "size_small": 112, "letter_spacing": -4, "degree_size": 60,
+                "degree_dy": -56, "icon_size": 100, "icon_gap": 18, "icon_dy": -2, "max_width": 440},
+    "caption": {"y": 290, "size": 22},
+    "sep":     {"y": 318, "x": 24, "width": 432, "stroke": 2, "color": "sep"},
+    "slots":   {"count": 6, "first_h": 2, "every_h": 2, "x": 60, "dx": 72, "hour_y": 350, "hour_size": 18,
+                "icon_y": 398, "icon_size": 38, "temp_y": 436, "temp_size": 26, "pop_y": 462, "pop_size": 16,
+                "pop_min": 20},
+    "no_forecast": {"y": 400, "size": 20, "icon_size": 24, "icon_gap": 8, "icon_dy": 5},
+    "fonts": [
+      {"name": "nunito_18", "weight": 400, "size": 18, "glyphs": "text"},
+      {"name": "nunito_20", "weight": 400, "size": 20, "glyphs": "text"},
+      {"name": "nunito_22", "weight": 400, "size": 22, "glyphs": "text"},
+      {"name": "nunito_semibold_16", "weight": 600, "size": 16, "glyphs": "digits"},
+      {"name": "nunito_semibold_20", "weight": 600, "size": 20, "glyphs": "text"},
+      {"name": "nunito_semibold_26", "weight": 600, "size": 26, "glyphs": "digits", "icons": true},
+      {"name": "nunito_semibold_52", "weight": 600, "size": 52, "glyphs": "digits"},
+      {"name": "nunito_semibold_60", "weight": 600, "size": 60, "glyphs": "degree"},
+      {"name": "nunito_semibold_112", "weight": 600, "size": 112, "glyphs": "digits"},
+      {"name": "nunito_semibold_140", "weight": 600, "size": 140, "glyphs": "digits"},
+      {"name": "weather_icons_24", "weight": 400, "size": 24, "glyphs": "none", "icons": true},
+      {"name": "weather_icons_38", "weight": 400, "size": 38, "glyphs": "none", "icons": true},
+      {"name": "weather_icons_100", "weight": 400, "size": 100, "glyphs": "none", "icons": true}
+    ],
+    "glyph_sets": {
+      "_doc": "As the thermostat's (fonts of the same name are generated once, from the first view: keep them equal). degree = only the raised degree sign.",
+      "text": "ASCII ąćęłńóśźżĄĆĘŁŃÓŚŹŻ°·–−",
+      "digits": "0123456789.,:–−°% ",
+      "degree": "°",
+      "none": ""
+    }
+  }
+}

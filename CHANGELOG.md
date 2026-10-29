@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.1.23 (2026-10-29)
+
+- Weather view (`design/views/weather`) for the wall panel's screen saver, after the owner's choice of four mockups
+  (`mockup/panel-v1.html`: variant A, the weather icon right of the temperature so negative values keep the layout):
+  clock and date, the outdoor temperature at 140 px (112 px when it and the icon would not fit), the weather in words
+  or the boiler's fault, six slots of the forecast every 2 h. Data: the retained `weather/forecast` of wall-panel's
+  wp-weather (Open-Meteo) and heatronic's outdoor sensor. `conditions` map WMO weather codes to Material Symbols
+  icons by day and night, colours and words.
+- `design_tokens.py`: a view's `conditions` become `HI_<VIEW>_CONDITIONS[]` (one row per code).
+- New LVGL fonts for it (Nunito 20, 22; semibold 16, 52, 60 (°), 112, 140; weather icons 24, 38, 100); the existing
+  fonts are unchanged.
+
 ## 0.1.22 (2026-10-27)
 
 - Thermostat view: hot water being charged no longer colours the dial (`arc` loses `dhw`). It changes nothing in the

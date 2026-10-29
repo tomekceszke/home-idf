@@ -141,6 +141,17 @@ def header(view_name):
             lines.append(f"    {{{c_string(key)}, {icon_utf8(view, m['icon'])}, {text(m['label'])}, "
                          f"{text(m.get('short', m['label']))}}},")
         lines.append("};")
+    if "conditions" in view:
+        lines += ["", "typedef struct {", "    uint8_t code;           /* WMO weather_code */", "    const char *icon_day;",
+                  "    const char *icon_night;", "    uint32_t color;", "    const char *label;",
+                  f"}} hi_{view_name}_condition_t;", "",
+                  "/* One row per code; a code not listed is the caller's fallback */",
+                  f"static const hi_{view_name}_condition_t HI_{v}_CONDITIONS[] = {{"]
+        for key, c in public(view["conditions"]).items():
+            for code in c["codes"]:
+                lines.append(f"    {{{int(code)}, {icon_utf8(view, c['day'])}, {icon_utf8(view, c['night'])}, "
+                             f"{hex_color(c['color'], pal)}, {text(c['label'])}}},   /* {key} */")
+        lines.append("};")
     for table in ("faults", "sources"):
         if table in view:
             lines += ["", f"static const char *const HI_{v}_{ident(table)}[][2] = {{"]

@@ -21,6 +21,7 @@ logic that maps the device's JSON onto the tables, which stays small because the
 | View | Data | Used by |
 |---|---|---|
 | `thermostat` | `heatronic/<mac>/thermostat` (heatronic-controller `docs/DATA.md`) | wall-panel (LVGL); heatronic-controller's app page next |
+| `weather` | `weather/forecast` (wall-panel `docs/DATA.md`, Forecast) and the thermostat's `outdoor_c` | wall-panel's screen saver (LVGL) |
 
 ## Fonts
 
