@@ -17,6 +17,9 @@ menu "home-idf"
         int "Scan for a stronger AP below this signal (dBm)"
         default -75
         range -95 -40
+        help
+            Signal as the station hears the AP. With hi_wifi_config_t.max_tx_power_qdbm the AP hears the station
+            weaker by the cap, so the trigger rises by (20 dBm - cap): -64 at 8.5 dBm.
 
     config HOME_IDF_WIFI_ROAM_MIN_GAIN_DB
         int "Reconnect when another AP is this much stronger (dB)"

@@ -18,6 +18,7 @@ static const char *TAG = "HI_WIFI";
 #define SUPERVISE_S       30        // period of the supervisor (roam check, stalled retries, driver restart)
 #define ROAM_SCAN_MAX_APS 8         // APs of our SSID kept from one scan (the strongest first)
 #define US                1000000LL
+#define FULL_TX_QDBM      80        // 20 dBm, the driver's maximum
 
 static EventGroupHandle_t s_events;
 static esp_timer_handle_t s_retry_timer;
@@ -67,10 +68,19 @@ static void retry_cb(void *arg)
     connect_now();
 }
 
+/* Scan below this signal. The AP hears a station with a TX cap weaker by the cap, so the trigger rises by it:
+ * at 8.5 dBm (meters, heatronic) -64 instead of -75 (heatronic heard its AP at -67 while the AP heard it at -86). */
+static int roam_rssi(void)
+{
+    int cap_db = s_max_tx_power_qdbm > 0 && s_max_tx_power_qdbm < FULL_TX_QDBM
+                 ? (FULL_TX_QDBM - s_max_tx_power_qdbm) / 4 : 0;
+    return CONFIG_HOME_IDF_WIFI_ROAM_RSSI + cap_db;
+}
+
 static void start_roam_scan(void)
 {
     wifi_ap_record_t ap;
-    if (esp_wifi_sta_get_ap_info(&ap) != ESP_OK || ap.rssi >= CONFIG_HOME_IDF_WIFI_ROAM_RSSI) return;
+    if (esp_wifi_sta_get_ap_info(&ap) != ESP_OK || ap.rssi >= roam_rssi()) return;
     wifi_scan_config_t scan = {
         .ssid = (uint8_t *) s_ssid,
         .scan_type = WIFI_SCAN_TYPE_ACTIVE,
@@ -82,7 +92,7 @@ static void start_roam_scan(void)
         ESP_LOGW(TAG, "Roam scan not started: %s", esp_err_to_name(err));
         return;
     }
-    ESP_LOGD(TAG, "Signal %d dBm below %d: looking for a stronger AP", ap.rssi, CONFIG_HOME_IDF_WIFI_ROAM_RSSI);
+    ESP_LOGD(TAG, "Signal %d dBm below %d: looking for a stronger AP", ap.rssi, roam_rssi());
 }
 
 static void roam_scan_done(void)

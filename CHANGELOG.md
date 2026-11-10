@@ -5,7 +5,8 @@
 - `hi_wifi` keeps a station on a usable AP. On 2026-11-10 an AP dropped out of CAPsMAN for 46 s at 04:17; every
   controller joined another AP and stayed there after it was back, and meters-controller (TX power capped at
   8.5 dBm) sat at -92 dBm on a far AP until its DHCP lease and then the link ran out, and was offline 2 h.
-  - Roaming: while the signal is below `HOME_IDF_WIFI_ROAM_RSSI` (-75 dBm) a background scan every
+  - Roaming: while the signal is below `HOME_IDF_WIFI_ROAM_RSSI` (-75 dBm; raised by 20 dBm minus the TX cap, so
+    -64 at 8.5 dBm, as the AP hears a capped station that much weaker) a background scan every
     `HOME_IDF_WIFI_ROAM_CHECK_S` (300 s, 0 = off) compares the APs of the SSID; one stronger by
     `HOME_IDF_WIFI_ROAM_MIN_GAIN_DB` (10 dB) triggers a reconnect, which joins the strongest AP. Stations with a
     good signal never scan. Decision in `hi_wifi_roam_pick()` (pure C, host test `test/test_wifi_roam.c`, in CI).

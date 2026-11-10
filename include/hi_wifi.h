@@ -25,7 +25,8 @@ typedef struct {
  * 802.11k/v) and reconnects forever with exponential backoff (CONFIG_HOME_IDF_WIFI_RETRY_MAX_S),
  * driven by an esp_timer so the system event loop is never blocked. Requires hi_nvs_init().
  *
- * A supervisor timer keeps it there: while the signal is below CONFIG_HOME_IDF_WIFI_ROAM_RSSI it scans every
+ * A supervisor timer keeps it there: while the signal is below CONFIG_HOME_IDF_WIFI_ROAM_RSSI (raised by the TX
+ * cap, see Kconfig) it scans every
  * CONFIG_HOME_IDF_WIFI_ROAM_CHECK_S and reconnects when another AP is CONFIG_HOME_IDF_WIFI_ROAM_MIN_GAIN_DB
  * stronger (stations stay on the AP they fell back to when theirs comes back); it restarts the WiFi driver,
  * not the device, after CONFIG_HOME_IDF_WIFI_RESET_AFTER_S offline; it restarts a retry chain that stopped. */
