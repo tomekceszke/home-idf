@@ -8,7 +8,7 @@ projects. It was hardened on devices running 24/7.
 |---|---|
 | `hi_system` | NVS init (reports erasure), reset reason, delayed restart |
 | `hi_secret` | Reveals credentials obfuscated with `tools/obfuscate.py` (hides them from a glance, **not** encryption) |
-| `hi_wifi` | Station that joins the **strongest** AP of an SSID (all-channel scan, 802.11k/v); reconnect with backoff on an `esp_timer`; never blocks boot or the event loop |
+| `hi_wifi` | Station that joins the **strongest** AP of an SSID (all-channel scan, 802.11k/v) and moves to a stronger one while its signal is weak; reconnect with backoff on an `esp_timer`, WiFi driver restart after a long outage; never blocks boot or the event loop |
 | `hi_log` | `esp_log` to serial + UDP, `(HH:MM:SS)` timestamps once the clock is set, error-line hook |
 | `hi_ntp` | Non-blocking SNTP, time zone, boot time |
 | `hi_ota` | HTTPS OTA from a local server with a pinned certificate, in a background task |

@@ -201,6 +201,13 @@ void hi_httpd_add_system_status(cJSON *root)
     } else {
         cJSON_AddNumberToObject(wifi, "rssi", 0);
     }
+    hi_wifi_stats_t ws;
+    hi_wifi_get_stats(&ws);
+    cJSON_AddNumberToObject(wifi, "disconnects", ws.disconnects);
+    cJSON_AddNumberToObject(wifi, "roams", ws.roams);
+    cJSON_AddNumberToObject(wifi, "resets", ws.resets);
+    cJSON_AddNumberToObject(wifi, "last_reason", ws.last_reason);
+    cJSON_AddNumberToObject(wifi, "tx_max_qdbm", ws.tx_max_qdbm);
 }
 
 /* ---------- UI ---------- */

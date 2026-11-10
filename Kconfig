@@ -5,6 +5,32 @@ menu "home-idf"
         default 60
         range 2 3600
 
+    config HOME_IDF_WIFI_ROAM_CHECK_S
+        int "WiFi roam check period (s), 0 = off"
+        default 300
+        range 0 3600
+        help
+            When an AP drops out for a moment, its stations join another one and stay there after it is back.
+            While the signal is weak, a background scan every this many seconds looks for a stronger AP.
+
+    config HOME_IDF_WIFI_ROAM_RSSI
+        int "Scan for a stronger AP below this signal (dBm)"
+        default -75
+        range -95 -40
+
+    config HOME_IDF_WIFI_ROAM_MIN_GAIN_DB
+        int "Reconnect when another AP is this much stronger (dB)"
+        default 10
+        range 3 40
+
+    config HOME_IDF_WIFI_RESET_AFTER_S
+        int "Restart the WiFi driver after this long offline (s), 0 = never"
+        default 900
+        range 0 86400
+        help
+            Restarts only the WiFi driver (esp_wifi_stop/start), not the device, so the application keeps its
+            state. Repeats at the same interval while the outage lasts.
+
     config HOME_IDF_AUTH_MAX_SESSIONS
         int "Stored web sessions"
         default 4

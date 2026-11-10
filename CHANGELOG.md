@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.1.24 (2026-11-10)
+
+- `hi_wifi` keeps a station on a usable AP. On 2026-11-10 an AP dropped out of CAPsMAN for 46 s at 04:17; every
+  controller joined another AP and stayed there after it was back, and meters-controller (TX power capped at
+  8.5 dBm) sat at -92 dBm on a far AP until its DHCP lease and then the link ran out, and was offline 2 h.
+  - Roaming: while the signal is below `HOME_IDF_WIFI_ROAM_RSSI` (-75 dBm) a background scan every
+    `HOME_IDF_WIFI_ROAM_CHECK_S` (300 s, 0 = off) compares the APs of the SSID; one stronger by
+    `HOME_IDF_WIFI_ROAM_MIN_GAIN_DB` (10 dB) triggers a reconnect, which joins the strongest AP. Stations with a
+    good signal never scan. Decision in `hi_wifi_roam_pick()` (pure C, host test `test/test_wifi_roam.c`, in CI).
+  - A lost IP address while still associated (`IP_EVENT_STA_LOST_IP`, the lease not renewed) reconnects.
+  - After `HOME_IDF_WIFI_RESET_AFTER_S` (900 s, 0 = never) offline the WiFi driver restarts (stop/start, not the
+    device, so the application keeps its state), again at that interval while the outage lasts.
+  - Retries never stop: a refused `esp_wifi_connect()` re-arms the timer (it used to end the chain, as no
+    disconnect event follows), and a supervisor restarts a chain that went quiet; a late timer after a reconnect
+    no longer connects again.
+  - `hi_wifi_config_t.max_tx_power_qdbm`: TX power cap set after every driver start (it used to be up to the
+    application, after `hi_wifi_start()`, and would be lost on a driver restart).
+  - `hi_wifi_get_stats()` and status `wifi`: `disconnects`, `roams`, `resets`, `last_reason`, `tx_max_qdbm` (the
+    limit the driver reports); the reconnect log line tells how long the station was offline.
+  - Tried on meters-controller (ESP32-C3): roam scans every 60 s at any signal for a test saw all 3 APs without a
+    disconnect, an MQTT reconnect or a lost gas frame.
+
 ## 0.1.23 (2026-10-29)
 
 - Weather view (`design/views/weather`) for the wall panel's screen saver, after the owner's choice of four mockups

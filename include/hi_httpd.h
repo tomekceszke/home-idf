@@ -66,5 +66,5 @@ esp_err_t hi_httpd_send_error(httpd_req_t *req, const char *status, const char *
 void hi_httpd_client_ip(httpd_req_t *req, char *out, size_t out_len);
 
 /* Adds {version, idf, partition, pending_verify, reset_reason, uptime_s, up_since, time_synced, ota_running,
- * heap_kb{free,min}, wifi{connected, rssi, channel, bssid}} to obj. */
+ * heap_kb{free,min}, wifi{connected, rssi, channel, bssid, disconnects, roams, resets, last_reason, tx_max_qdbm}} to obj. */
 void hi_httpd_add_system_status(cJSON *obj);

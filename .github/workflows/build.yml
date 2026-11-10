@@ -19,6 +19,10 @@ jobs:
         run: |
           cc -Wall -Wextra -Werror -I include src/hi_deadband.c test/test_deadband.c -lm -o test_deadband
           ./test_deadband
+      - name: hi_wifi roam decision
+        run: |
+          cc -Wall -Wextra -Werror -I include src/hi_wifi_roam.c test/test_wifi_roam.c -o test_wifi_roam
+          ./test_wifi_roam
       - name: design tokens (match app_shell.css, generated header)
         run: |
           python3 tools/design_tokens.py check
