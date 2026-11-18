@@ -7,6 +7,7 @@ set(srcs
     "src/hi_ntp.c"
     "src/hi_ota.c"
     "src/hi_notify.c"
+    "src/hi_notify_late.c"
     "src/hi_health.c"
     "src/hi_auth.c"
     "src/hi_httpd.c"

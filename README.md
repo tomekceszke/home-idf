@@ -13,7 +13,7 @@ projects. It was hardened on devices running 24/7.
 | `hi_ntp` | Non-blocking SNTP, time zone, boot time |
 | `hi_ota` | HTTPS OTA from a local server with a pinned certificate, in a background task |
 | `hi_health` | Verifies a new image (app-defined health predicate, reset counting that ignores brownouts) and rolls back to the previous slot |
-| `hi_notify` | [ntfy](https://ntfy.sh) push notifications through a queue: callers never block; topics for info, warnings and errors/alarms; errors are de-duplicated |
+| `hi_notify` | [ntfy](https://ntfy.sh) push notifications through a queue: callers never block; topics for info, warnings and errors/alarms; errors are de-duplicated; held while offline and sent once WiFi is back, marked late |
 | `hi_deadband` | Send-on-change for values read often: a reading goes out on a change of at least *delta* or after *max gap*, so a quiet sensor costs one message per gap (pure C, host-tested) |
 | `hi_mqtt` | *Optional* (`CONFIG_HOME_IDF_MQTT`): MQTT to `<prefix>/<mac>/<kind>`, retained `status` (LWT) and `state` topics, subscriptions to retained configuration and to other devices' topics |
 | `hi_auth` | Web login: PBKDF2-SHA256 password, sessions persisted in NVS (hash only), CSRF tokens (HMAC), login back-off, admin header for scripts |

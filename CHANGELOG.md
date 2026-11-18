@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.1.25 (2026-11-18)
+
+- `hi_notify` holds a notification while the station is offline and sends it once WiFi is back, instead of dropping
+  it: heatronic-controller's error line for its control switching itself off was raised during the 6-s WiFi
+  reconnect that caused it, and never arrived (2026-11-18 11:59). A notification sent 30 s or more after it was
+  raised carries a note, `[raised 11:59:17, sent 2 min late]` (only the delay when the clock was not set then;
+  `hi_notify_late_note()`, pure C, host test `test/test_notify_late.c`, in CI). Up to 3 tries 5 s apart while
+  connected (an HTTP status other than 2xx counts as failed too). While one waits, new ones queue (`queue_size`); a
+  full queue still drops the newest, so callers never block.
+
 ## 0.1.24 (2026-11-10)
 
 - `hi_wifi` keeps a station on a usable AP. On 2026-11-10 an AP dropped out of CAPsMAN for 46 s at 04:17; every
